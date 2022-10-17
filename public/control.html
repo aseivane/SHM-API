@@ -55,11 +55,26 @@
   </nav>
 
 
+  <form action="form_inicio" method="post">
+    Ingrese la hora epoch de inicio:
+    <input type="text" name="eposh_inicio" size="30"><br>
+    Duracion del muestreo en minutos:
+    <input type="text" name="duracion_muestreo" size="30"><br>
+    Número del muestreo (identificación):
+    <input type="text" name="nro_muestreo" size="30"><br>
+    Nodos Sinconizados (es necesario esperar a que se sincronicen los nodos para que funcione): 
+    <input type="radio" id="sync" name="sync" value="SI">
+    <label for="SI">SI</label>
+    <input type="radio" id="sync" name="sync" value="NO">
+    <label for="NO">NO</label><br>
+    <input type="submit" value="Iniciar Muestreo">
+  </form>
 
+<!--
   <input type="TEXT" id="user" size="40"><br>
   <input type="password" id="password" size="40"><br>
-  <input type="button" id="submit" value="Submit">
-
+  <input type="button" id="submit_inicio" value="Submit">
+-->
 
 
 </body>
