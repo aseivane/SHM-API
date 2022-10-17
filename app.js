@@ -19,6 +19,7 @@ Mostrar los archivos: https://www.digitalocean.com/community/tutorials/use-expre
 
 var express = require("express");
 var bodyParser = require("body-parser");
+var serveIndex = require('serve-index');
 var app = express();
 const shell = require('shelljs')
 const { spawn } = require("child_process"); // Para ejecutar scripts en un proceso nuevo
@@ -119,6 +120,10 @@ app.post('/borrar_SD',function(req,res){
 
 });
 
+// Serve URLs like /ftp/thing as public/ftp/thing
+// The express.static serves the file contents
+// The serveIndex is this module serving the directory
+app.use('/datos', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
 
 app.listen(3000,function(){
 console.log("Servidor WEB iniciado en el puerto 3000");
