@@ -38,7 +38,7 @@ cat /dev/null > $archivo3
 #------------------------------------------------
 
 hora_actual_s=`date "+%s"`   # Lee la hora local en formato EPOCH
-hora_inicio_s= $epoch_inicio
+hora_inicio_s=$epoch_inicio
 
 #hora_inicio_s=$(( hora_actual_s + tout_inicio_s ))
 

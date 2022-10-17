@@ -5,9 +5,10 @@ broker=$1
 port="1883"
 usr=$2
 pass=$3
-duracion=$4
-nro_medicion=$5
-epoch_inicio=$6
+epoch_inicio=$4
+duracion=$5
+nro_medicion=$6
+
 
 topic1="control/inicio_muestreo"
 
