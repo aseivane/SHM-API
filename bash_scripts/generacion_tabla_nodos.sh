@@ -3,11 +3,10 @@
 
 # Parametros iniciales
 
-broker="192.168.0.10"
+broker=$1
 port="1883"
-usr="usuario"
-pass="usuariopassword"
-
+usr=$2
+pass=$3
 
 topic2="nodo/estado"
 

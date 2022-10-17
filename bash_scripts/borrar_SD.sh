@@ -1,4 +1,8 @@
 #!/bin/bash
+ip_mqtt_broker=$1
+usuario_mqtt=$2
+pass_mqtt=$3
+
 
 echo "Reiniciando todos los nodos"
-mosquitto_pub -h 192.168.0.10 -t control/borrarSD -u usuario -P usuariopassword -m "0" 
+mosquitto_pub -h $ip_mqtt_broker -t control/borrarSD -u $usuario_mqtt -P $pass_mqtt -m "0" 

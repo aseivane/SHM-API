@@ -39,8 +39,9 @@ var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
 
-
-
+var ip_mqtt_broker = '192.168.0.10';
+var usuario_mqtt = 'usuario';
+var pass_mqtt = 'usuariopassword';
 
 var app = express();
 const shell = require('shelljs')
@@ -52,25 +53,45 @@ app.use(express.static('public'));
 
 app.get('/',function(req,res){
 
+//    res.render('index.pug', { name: 'John Doe', age: 21 });
+
+  //  res.render(__dirname + "index.html", {name:ip_mqtt_broker});
+
 res.sendfile("index.html");
 //res.sendfile("./");
 });
 
+app.post('/form_config_sistema',function(req,res){
+    console.log("Formulario de configuración completado:");
+
+    console.log("IP del Broker: " + req.body.ip_mqtt);
+    console.log("Usuario: " + req.body.usr_mqtt);
+    console.log("Passwd: "+ req.body.pass_mqtt);
+    
+    ip_mqtt_broker = req.body.ip_mqtt;
+    usuario_mqtt = req.body.usr_mqtt;
+    pass_mqtt = req.body.pass_mqtt;
+
+
 /*
-app.post('/login',function(req,res){
-var user_name = req.body.user;
-var password = req.body.password;
-console.log("From Client POST request: User name = "+user_name+" and password is "+password);
-shell.exec('./prueba.sh')
-res.end("yes");
+    else if(req.body.sync == "NO"){
+        console.log("Muestreo NO SINCRONIZADO");
+        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
+    }
+  */  
+   
+    res.redirect('back');
+
 });
-*/
+
 
 app.post('/actualizar_estados',function(req,res){
     console.log("Consulta de estado enviada");
 
-    //shell.exec('./generacion_tabla_nodos.sh')
-    spawn('./bash_scripts/generacion_tabla_nodos.sh');
+
+    shell.exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //bloqueante
+    //spawn('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //spawn funciona en segundo plano
+   
     res.redirect('back');
   //  res.end("yes");
 });
@@ -87,26 +108,14 @@ app.post('/form_inicio',function(req,res){
     
     if (req.body.sync == "SI"){
         console.log("Muestreo SINCRONIZADO");
-        shell.exec('./bash_scripts/principal_sync.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.epoch_inicio +' ');
+        shell.exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.epoch_inicio +' ');
     }
     else if(req.body.sync == "NO"){
         console.log("Muestreo NO SINCRONIZADO");
-        shell.exec('./bash_scripts/principal_async.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
+        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
     }
     
-//    shell.exec('mosquitto_pub -h 192.168.0.10 -t nodo/error -u usuario -P usuariopassword -m ' + req.body.eposh_inicio +' ')
-
-    //spawn('./principal.sh ', [req.body.duracion_muestreo , req.body.nro_muestreo , req.body.duracion_muestreo]);
-
-
-  //  spawn('./principal.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.duracion_muestreo +' ');
-
-
-    
-    //console.log("Sin"+ req.body.eposh_inicio);
-
-    //shell.exec('./generacion_tabla_nodos.sh')
-    
+   
     res.redirect('back');
 
 //    res.send("Muestreo iniciado");
@@ -117,7 +126,7 @@ app.post('/form_inicio',function(req,res){
 app.post('/cancelar_muestreo',function(req,res){
     console.log("Boton apretado: Cancelar muestreo");
 
-    spawn('./bash_scripts/cancelar_muestreo.sh');
+    shell.exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
     res.redirect('back');
 
 //    res.send("Cancelado");
@@ -126,17 +135,16 @@ app.post('/cancelar_muestreo',function(req,res){
 
 app.post('/reiniciar_nodos',function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
-    spawn('./bash_scripts/reiniciar_nodos.sh');
+    shell.exec('./bash_scripts/reiniciar_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
 //    res.send("Reiniciados");
     res.redirect('back');
 
 });
 
 
-
 app.post('/borrar_SD',function(req,res){
     console.log("Boton apretado: Borrar los archivos de los nodos");
-    spawn('./bash_scripts/borrar_SD.sh');
+    shell.exec('./bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
 //    res.send("Reiniciados");
     res.redirect('back');
 

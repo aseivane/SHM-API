@@ -2,7 +2,8 @@ clear all
 close all
 
 % Nombre del archivo a abrir
-filename = "../mediciones/medicion_003/datos_003/nodo_84d8e28798/3-0.DAT";
+%filename = "../mediciones/medicion_003/datos_003/nodo_84d8e28798/3-0.DAT";
+filename = "/home/ninja/INSYNC/ProyectoVialidad/NODOCoordinador/NODEJS/Pagina/Actual/mediciones/medicion_002/datos_002/nodo_84d8e28798/2-0.DAT";
 long_encabezado = 23;
 
 

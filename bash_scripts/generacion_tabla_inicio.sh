@@ -1,22 +1,16 @@
 #!/bin/bash
 
 # Parametros iniciales
-broker="192.168.0.10" 
+broker=$1
 port="1883"
-usr="usuario"
-pass="usuariopassword"
+usr=$2
+pass=$3
+nro_medicion=$4
 
-#topic1="control/inicio_muestreo"
 topic2="nodo/confirmacion"
 
-archivo1="./mediciones/medicion_$1/mensajes_mqtt.log"
-archivo2="./mediciones/medicion_$1/tabla_nodos_inicio.csv"
-
-#echo "Numero de medicion:"
-#echo  $1
-
-#Enviar mensaje de averiguacion de estado a todos los nodos
-#mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
+archivo1="./mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+archivo2="./mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
 
 # Guardo las respuestas y genero la tabla de nodos al inicio
 while read value; do
@@ -26,7 +20,6 @@ while read value; do
    echo "Hora Actual: $ts"
 
   topic=`echo "$value" | awk '{print $1}'`
-
 
   if [[ $topic = $topic2 ]]; then
   # guardar id y estado del nodo recibido

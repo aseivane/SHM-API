@@ -2,22 +2,23 @@
 # Con openwrt debemos cambiar lo anterior por #!/bin/sh
 
 # Parametros iniciales
-broker="192.168.0.10" 
+broker=$1
 port="1883"
-usr="usuario"
-pass="usuariopassword"
+usr=$2
+pass=$3
+nro_medicion=$4
 
 topic2="nodo/fin"
-nro_medicion=`printf %03d $1`
-archivo1="./mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
-archivo3="./mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
+nro_medicion_ext=`printf %03d $nro_medicion`
+archivo1="./mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
+archivo3="./mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
 tout_fin="20s"
 
 #------------------------------------
 # Escuchar las confirmaciones de las mediciones completas
 echo "Comenzando espera de $tout_fin para confirmaciones..."
 
-# Formato mensaje: [mac] [nro_meidcion]. $1 <topic>, $2 [mac], $3 [nro_medicion]
+# Formato mensaje: [mac] [nro_meidcion]. $1 <topic>, $2 [mac], $3 [nro_medicion_ext]
 
 while read value; do
 

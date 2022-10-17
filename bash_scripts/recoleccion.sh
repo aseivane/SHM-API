@@ -1,17 +1,19 @@
 #!/bin/bash
 
 # Parametros iniciales
-nro_medicion=`printf %03d $1`
-directorio1="./mediciones/medicion_$nro_medicion"
+broker=$1
+port="1883"
+usr=$2
+pass=$3
+nro_medicion=$4
+
+nro_medicion_ext=`printf %03d $nro_medicion`
+
+directorio1="./mediciones/medicion_$nro_medicion_ext"
 #archivo1="$directorio1/mensajes_mqtt.log"
 archivo2="$directorio1/tabla_nodos_fin.csv"
 
 topic1="control/borrarSD"
-broker="192.168.0.10" 
-port="1883"
-usr="usuario"
-pass="usuariopassword"
-
 
 # verificar archivos
 #--------------------------------------------
@@ -20,8 +22,8 @@ confirmados=$(wc -l $archivo2)
 k=$(echo $confirmados | awk '{print $1}')  # numero de nodos que confirmaron la medición completa
 
 # carpeta de almacenamiento general (contiene carpetas para cada nodo)
-if [ ! -d "$directorio1/datos_$nro_medicion" ]; then
-mkdir "$directorio1/datos_$nro_medicion"
+if [ ! -d "$directorio1/datos_$nro_medicion_ext" ]; then
+mkdir "$directorio1/datos_$nro_medicion_ext"
 fi
 
 IDs=`cat $archivo2 | cut -d ',' -f1` # extraemos la lista de MACs (IDs) de los nodos
@@ -34,7 +36,7 @@ do
 id_nodo=$(echo $IDs | awk "{print \$$i}") #extrae MAC (ID) de i-esimo nodo
 
 #nro_nodo=`printf %03d $i`
-directorio2="$directorio1/datos_$nro_medicion/nodo_$id_nodo" # genera ruta a la carpeta del i-esimo nodo
+directorio2="$directorio1/datos_$nro_medicion_ext/nodo_$id_nodo" # genera ruta a la carpeta del i-esimo nodo
 
 if [ ! -d $directorio2 ]; then  # si no existe la carpeta del nodo, la crea
 mkdir $directorio2
