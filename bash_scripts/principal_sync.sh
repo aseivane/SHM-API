@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# COMANDO 
-# ./principal.sh "2021/08/25 23:02:00" "2021/08/25 23:02:10" "1"
-
 # Parametros iniciales
 #---------------------------------------------------
 duracion_m=$1
 nro_medicion=`printf %03d "$2"` 
-tout_recoleccion_m=$3
+epoch_inicio=$3
+
 tout_inicio_s=0
 directorio="mediciones/medicion_$nro_medicion"
 archivo1="mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
@@ -15,7 +13,6 @@ archivo2="mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
 archivo3="mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 n=0
 k=0
-
 
 # Comprobar la existencia de directorio de medición y archivos
 # Si existen, se vacían, sino se crean.
@@ -30,22 +27,14 @@ cat /dev/null > $archivo1
 cat /dev/null > $archivo2
 cat /dev/null > $archivo3
 
-
 # Configuración inicial de tiempos
 #------------------------------------------------
 
-# if [[ $# != 3 ]]; then
-# echo "Deben ingresarse 2 argumentos: [duracion (seg)] [número de medición] [máxima espera para recoleccion (min)]."
-# echo "Ejemplo: ./medicioens_gateway.sh \"30\" \"1\"" 
-# exit
-# else
-# hora_actual_s=`date "+%s"` 
-# hora_inicio_s=$(( hora_actual_s + tout_inicio_s ))
-# hora_fin_s=$(( hora_inicio_s + (60*duracion_m )))
-# fi
+hora_actual_s=`date "+%s"`   # Lee la hora local en formato EPOCH
+hora_inicio_s=$3
 
-hora_actual_s=`date "+%s"` 
-hora_inicio_s=$(( hora_actual_s + tout_inicio_s ))
+#hora_inicio_s=$(( hora_actual_s + tout_inicio_s ))
+
 hora_fin_s=$(( hora_inicio_s + (60*duracion_m )))
 
 # Enviar mensaje de inicialización y escuchar respuestas
@@ -58,11 +47,10 @@ echo -e "\nINICIO\n------"
 echo "Hora de inicio:       $hora_inicio"
 echo "Hora de finalización: $hora_fin"
 echo "Duración configurada: $duracion_m minutos"
+
 echo "Se envia mensaje de inicialización e identificación de nodos."
-
-
 # escucha confirmación de inicio de los nodos
-./bash_scripts/nodos_inicio.sh $hora_inicio_s $duracion_m $2
+./bash_scripts/nodos_inicio_sync.sh $epoch_inicio $duracion_m $2
 
 # contamos la cantidad de nodos identificados
 echo $archivo2
@@ -119,7 +107,7 @@ echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicial
 #--------------------------------------------------
 echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
 echo "Solicitando archivos a los nodos..."
-./bash_scripts/recoleccion.sh $2 $tout_recoleccion_m
+./bash_scripts/recoleccion.sh $2
 
 
 #--------------------------------------------------

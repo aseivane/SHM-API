@@ -43,7 +43,8 @@ app.post('/actualizar_estados',function(req,res){
 
     //shell.exec('./generacion_tabla_nodos.sh')
     spawn('./bash_scripts/generacion_tabla_nodos.sh');
-    res.end("yes");
+    res.redirect('back');
+  //  res.end("yes");
 });
 
 app.post('/form_inicio',function(req,res){
@@ -51,16 +52,18 @@ app.post('/form_inicio',function(req,res){
 
   //  console.log("Datos Formulario: " + req.body);
 
-    console.log("Epoch inicio: " + req.body.eposh_inicio);
+    console.log("Epoch inicio: " + req.body.epoch_inicio);
     console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
     console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
     console.log("Muestreo sincronizado: " + req.body.sync);
     
     if (req.body.sync == "SI"){
         console.log("Muestreo SINCRONIZADO");
+        shell.exec('./bash_scripts/principal_sync.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.epoch_inicio +' ');
     }
     else if(req.body.sync == "NO"){
         console.log("Muestreo NO SINCRONIZADO");
+        shell.exec('./bash_scripts/principal_async.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
     }
     
 //    shell.exec('mosquitto_pub -h 192.168.0.10 -t nodo/error -u usuario -P usuariopassword -m ' + req.body.eposh_inicio +' ')
@@ -70,15 +73,15 @@ app.post('/form_inicio',function(req,res){
 
   //  spawn('./principal.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.duracion_muestreo +' ');
 
-    shell.exec('./bash_scripts/principal.sh ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.duracion_muestreo +' ');
 
     
     //console.log("Sin"+ req.body.eposh_inicio);
 
     //shell.exec('./generacion_tabla_nodos.sh')
     
+    res.redirect('back');
 
-    res.send("Muestreo iniciado");
+//    res.send("Muestreo iniciado");
 //    res.end("yes");
 });
 
@@ -87,14 +90,28 @@ app.post('/cancelar_muestreo',function(req,res){
     console.log("Boton apretado: Cancelar muestreo");
 
     spawn('./bash_scripts/cancelar_muestreo.sh');
-    res.send("Cancelado");
+    res.redirect('back');
+
+//    res.send("Cancelado");
 });
 
 
 app.post('/reiniciar_nodos',function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
     spawn('./bash_scripts/reiniciar_nodos.sh');
-    res.send("Reiniciados");
+//    res.send("Reiniciados");
+    res.redirect('back');
+
+});
+
+
+
+app.post('/borrar_SD',function(req,res){
+    console.log("Boton apretado: Borrar los archivos de los nodos");
+    spawn('./bash_scripts/borrar_SD.sh');
+//    res.send("Reiniciados");
+    res.redirect('back');
+
 });
 
 

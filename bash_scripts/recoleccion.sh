@@ -1,5 +1,4 @@
 #!/bin/bash
-# Con openwrt debemos cambiar lo anterior por #!/bin/sh
 
 # Parametros iniciales
 nro_medicion=`printf %03d $1`
@@ -13,10 +12,8 @@ port="1883"
 usr="usuario"
 pass="usuariopassword"
 
-#tout_recoleccion=60m
-tout_wget="$2m"
 
-# veificar archivos
+# verificar archivos
 #--------------------------------------------
 
 confirmados=$(wc -l $archivo2)
@@ -47,15 +44,13 @@ fi
 ip_nodo=$(echo $IPs | awk "{print \$$i}") #extrae MAC (ID) de i-esimo nodo
 echo $ip_nodo
 
-
 # Envia comando wqet para descargar los archivos
 
 wget -r -e robots=off $ip_nodo -P $directorio2 -nd
 echo "Nodo $id_nodo: recepción completa."
 
-mosquitto_pub -t $topic1 -h $broker -p $port -m "$id_nodo" -u $usr -P $pass # argumentos: $1 EPOCH inicio, $2 duracion, $3 nro de medicion
+mosquitto_pub -t $topic1 -h $broker -p $port -m "$id_nodo" -u $usr -P $pass # Borrar tarjeta de memoria
 echo "Nodo $id_nodo: mensaje de borrado enviado."
-
 
 done
 

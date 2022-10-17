@@ -22,7 +22,6 @@ if test -f "$archivo2"; then
 fi
 
 # Preguntar por el estado de los nodos
-
 mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
 
 while read value; do

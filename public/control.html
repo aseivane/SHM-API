@@ -57,32 +57,41 @@
     </div>
   </nav>
 
+
+  <h1>CONTROL DE INICIO DE MUESTREO</h1>
+
+
+
+ <p>
   <form action="form_inicio" method="post">
     Ingrese la hora epoch de inicio:
-    <input type="text" name="eposh_inicio" size="30"><br>
+    <input type="text" name="epoch_inicio" size="30" value=1 ><br>
     Duracion del muestreo en minutos:
-    <input type="text" name="duracion_muestreo" size="30"><br>
+    <input type="text" name="duracion_muestreo" size="30" value=1><br>
     Número del muestreo (identificación):
-    <input type="text" name="nro_muestreo" size="30"><br>
+    <input type="text" name="nro_muestreo" size="30" value=1><br>
     Nodos Sinconizados (es necesario esperar a que se sincronicen los nodos para que funcione): 
     <input type="radio" id="sync" name="sync" value="SI">
     <label for="SI">SI</label>
-    <input type="radio" id="sync" name="sync" value="NO">
+    <input type="radio" id="sync" name="sync" value="NO" checked="checked">
     <label for="NO">NO</label><br>
     <input type="submit" value="Iniciar Muestreo">
   </form>
-
+ </p>
  
  
- 
+<p>
 
- <ul>
-  <li><b>La hora de inicio se ignora en modo no sincronizado, el inicio es instantáneo</b></li>
-  <li><b>La hora de inicio tiene que ser por lo menos 10 minutos en el futuro</b></li>
-  <li><b>Comprobar que los nodos estén sincronizados antes de usar el modo sincronizado</b></li>
-</ul> 
+  <ul>
+    <li><b>La hora de inicio se ignora en modo no sincronizado, el inicio es instantáneo</b></li>
+    <li><b>La hora de inicio tiene que ser por lo menos 10 minutos en el futuro</b></li>
+    <li><b>Comprobar que los nodos estén sincronizados antes de usar el modo sincronizado</b></li>
+  </ul> 
+  
+</p>
 
 
+<h1>OTROS CONTROLES</h1>
 
 <p>
   <form action="cancelar_muestreo" method="post"> 
@@ -98,7 +107,11 @@
   </form>
 </p>
 
-
+<p>
+  <form action="borrar_SD" method="post"> 
+    <button>Borrar archivos en los nodos</button> 
+  </form>
+</p>
 
 
 
