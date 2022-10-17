@@ -11,6 +11,9 @@ Ejecucion de comando bash: https://stackoverflow.com/questions/44647778/how-to-r
 
 Leer formularios de la página html: https://medium.com/swlh/read-html-form-data-using-get-and-post-method-in-node-js-8d2c7880adbf
                                     https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/forms
+
+
+Mostrar los archivos: https://www.digitalocean.com/community/tutorials/use-expressjs-to-deliver-html-files                                    
 */
 
 
@@ -25,7 +28,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
 app.get('/',function(req,res){
+
 res.sendfile("index.html");
+//res.sendfile("./");
 });
 
 /*
