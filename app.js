@@ -1,4 +1,16 @@
 /* Tutoriales
+1) Para usar este programa se necesita instalar los siguientes programas
+
+    sudo apt install nodejs npm mosquitto
+
+2) Despues pararse en el directorio de este archivo y ejecutar:
+    npm install
+
+3) Hacer ejecutables los scripts en la carpeta bash-scripts
+    chmod +x *.*
+    
+    
+
 https://www.youtube.com/watch?v=EuZnr5NZWso
 
 https://www.youtube.com/watch?v=pk5WNnTzYyw
@@ -13,13 +25,23 @@ Leer formularios de la página html: https://medium.com/swlh/read-html-form-data
                                     https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/forms
 
 
-Mostrar los archivos: https://www.digitalocean.com/community/tutorials/use-expressjs-to-deliver-html-files                                    
+Mostrar los archivos: https://www.digitalocean.com/community/tutorials/use-expressjs-to-deliver-html-files  
+Descargar los archivos: https://iq.opengenus.org/download-server-files-in-node-js/                                  
+Comprimir Directorio: https://github.com/Mostafa-Samir/zip-local
+Borrar un archivo: https://www.w3schools.com/nodejs/nodejs_filesystem.asp
+
 */
 
 
 var express = require("express");
 var bodyParser = require("body-parser");
 var serveIndex = require('serve-index');
+var zipper = require('zip-local');
+var fs = require('fs');
+
+
+
+
 var app = express();
 const shell = require('shelljs')
 const { spawn } = require("child_process"); // Para ejecutar scripts en un proceso nuevo
@@ -120,10 +142,26 @@ app.post('/borrar_SD',function(req,res){
 
 });
 
+app.post('/Descargar_datos',function(req,res){
+    console.log("Boton apretado: Descargar datos");
+    zipper.sync.zip("./mediciones/").compress().save("mediciones.zip");
+
+    res.download('mediciones.zip');   
+
+    /*
+    fs.unlink('mediciones.zip', function (err) {
+        if (err) throw err;
+        console.log('File deleted!');
+      });
+      */
+});
+
+
+
 // Serve URLs like /ftp/thing as public/ftp/thing
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory
-app.use('/datos', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
+app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
 
 app.listen(3000,function(){
 console.log("Servidor WEB iniciado en el puerto 3000");

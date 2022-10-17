@@ -47,7 +47,10 @@ echo $ip_nodo
 # Envia comando wqet para descargar los archivos
 
 wget -r -e robots=off $ip_nodo -P $directorio2 -nd
+rm $directorio2/index.html  #Borro el archivo index.html porque no me sirve y molesta
+
 echo "Nodo $id_nodo: recepción completa."
+
 
 mosquitto_pub -t $topic1 -h $broker -p $port -m "$id_nodo" -u $usr -P $pass # Borrar tarjeta de memoria
 echo "Nodo $id_nodo: mensaje de borrado enviado."
