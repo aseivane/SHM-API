@@ -1,4 +1,4 @@
-import os, math
+import os, math, csv
 import numpy as np
 import struct
 import matplotlib.pyplot as plt
@@ -101,6 +101,26 @@ class Medicion:
         cantMuestras = math.ceil(os.fstat(fileName.fileno()).st_size / self.BYTES_MUESTRA)
         cantMuestras -=2
         return cantMuestras
+    
+    def exportarCSV(self):
+        csvName = self.dirName.split("\\")[-1] + ".csv"
+        csvName = self.dirName + "\\" + csvName
+
+        with open( csvName, 'w', newline='') as file:
+            writer = csv.writer(file)
+
+            headers = ['accelerationX', 'accelerationY', 'accelerationZ',
+                     'gyroscopeX', 'gyroscopeY', 'gyroscopeZ', 'Temperature']  
+
+            writer.writerow(headers)
+            matrix = [ self.accelerationX , self.accelerationY, self.accelerationZ,
+                        self.gyroscopeX, self.gyroscopeY, self.gyroscopeZ, self.temp ]
+            #traspone la matrix
+            matrix = map(list, zip(*matrix))
+
+            writer.writerows(matrix)
+    
+
         
 def graficarMediciones(medicion):
     fig, ax = plt.subplots(3,1)
@@ -136,12 +156,16 @@ if __name__ == '__main__':
     # Los siguientes valores dependen de la sensibilidad utilizada
     ESCALA_ACELERACION = 16384
     ESCALA_GIROSCOPO = 131
+
     dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
+    
     listMediciones = agregarMediciones(dirName)
+    
     for medicion in listMediciones:
         medicion.leerMediciones()
         medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
         medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
+        medicion.exportarCSV()
 
     graficarMediciones(listMediciones[1])
 
