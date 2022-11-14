@@ -36,7 +36,8 @@ class Medicion:
         #El ESP genera archivos de a 3000 mediciones (1min de grabacion)
         dirList = os.listdir(self.dirName)
         for archivo in dirList:
-            self.leerArchivoMediciones(self.dirName+"\\"+archivo)
+            if archivo.split('.')[-1] == "DAT":
+                self.leerArchivoMediciones(self.dirName+"\\"+archivo)
     
     def leerArchivoMediciones(self, fileName) -> None:
         file = open(fileName,"rb")
@@ -106,19 +107,25 @@ class Medicion:
         csvName = self.dirName.split("\\")[-1] + ".csv"
         csvName = self.dirName + "\\" + csvName
 
-        with open( csvName, 'w', newline='') as file:
-            writer = csv.writer(file)
+        try:
+            newFile = open( csvName, 'w', newline='')
+        except:
+            raise "No se puede abrir o modificar el archivo"
 
-            headers = ['accelerationX', 'accelerationY', 'accelerationZ',
-                     'gyroscopeX', 'gyroscopeY', 'gyroscopeZ', 'Temperature']  
+        writer = csv.writer(newFile)
 
-            writer.writerow(headers)
-            matrix = [ self.accelerationX , self.accelerationY, self.accelerationZ,
-                        self.gyroscopeX, self.gyroscopeY, self.gyroscopeZ, self.temp ]
-            #traspone la matrix
-            matrix = map(list, zip(*matrix))
+        headers = ['accelerationX', 'accelerationY', 'accelerationZ',
+                    'gyroscopeX', 'gyroscopeY', 'gyroscopeZ', 'Temperature']  
 
-            writer.writerows(matrix)
+        writer.writerow(headers)
+        matrix = [ self.accelerationX , self.accelerationY, self.accelerationZ,
+                    self.gyroscopeX, self.gyroscopeY, self.gyroscopeZ, self.temp ]
+        #traspone la matrix
+        matrix = map(list, zip(*matrix))
+
+        writer.writerows(matrix)
+
+        newFile.close()
     
 
         
