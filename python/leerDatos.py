@@ -52,29 +52,10 @@ class Medicion:
         file.close()
 
     def agregarMediciones(self, muestra) -> None:
-        # toma bytes de a dos valores uint8 + uint8 -> int16
-        '''
-        cada byte es una medicion de lo siguiente campos
-        ACCEL_XOUT_H = muestra[1];
-        ACCEL_XOUT_L = muestra[2];
-        ACCEL_YOUT_H = muestra[3];
-        ACCEL_YOUT_L = muestra[4];
-        ACCEL_ZOUT_H = muestra[5];
-        ACCEL_ZOUT_L = muestra[6];
-
-        TEMP_OUT_H = muestra[7];
-        TEMP_OUT_L = muestra[8];
-
-        GYRO_XOUT_H = muestra[9];
-        GYRO_XOUT_L = muestra[10];
-        GYRO_YOUT_H = muestra[11];
-        GYRO_YOUT_L = muestra[12];
-        GYRO_ZOUT_H = muestra[13];
-        GYRO_ZOUT_L = muestra[14];
-        '''
         if len(muestra) != 14:
             return
-
+            
+        # toma bytes de a dos valores uint8 + uint8 -> int16
         listaMuestras = struct.unpack('7h', muestra)
 
         self.accelerationX.append(listaMuestras[0])
