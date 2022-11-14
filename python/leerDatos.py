@@ -80,18 +80,18 @@ class Medicion:
         self.accelerationY.append(listaMuestras[1])
         self.accelerationZ.append(listaMuestras[2])
 
-        self.temp.append(listaMuestras[3])
+        self.temp.append(listaMuestras[3]/340 + 36.53)
 
         self.gyroscopeX.append(listaMuestras[4])
         self.gyroscopeY.append(listaMuestras[5])
         self.gyroscopeZ.append(listaMuestras[6])
 
-    def cambiarEscalaGyroscopo(self, escala):
+    def cambiarEscalaGyroscopo(self, escala) -> None:
         self.gyroscopeX = [ x/escala for x in self.gyroscopeX]
         self.gyroscopeY = [ x/escala for x in self.gyroscopeY]
         self.gyroscopeZ = [ x/escala for x in self.gyroscopeZ]
 
-    def cambiarEscalaAcelerometro(self, escala):
+    def cambiarEscalaAcelerometro(self, escala) -> None:
         self.accelerationX = [ x/escala for x in self.accelerationX]
         self.accelerationY = [ x/escala for x in self.accelerationY]
         self.accelerationZ = [ x/escala for x in self.accelerationZ]
@@ -102,18 +102,7 @@ class Medicion:
         cantMuestras -=2
         return cantMuestras
         
-
-if __name__ == '__main__':
-
-    # Los siguientes valores dependen de la sensibilidad utilizada
-    ESCALA_ACELERACION = 16384
-    ESCALA_GIROSCOPO = 131
-    dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025\\nodo_94b97eda7f38"
-    medicion = Medicion(dirName)
-    medicion.leerMediciones()
-    medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
-    medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
-
+def graficarMediciones(medicion):
     fig, ax = plt.subplots(3,1)
 
     ax[0].set_title("Acelerometro")
@@ -130,6 +119,33 @@ if __name__ == '__main__':
     ax[2].plot(medicion.temp, color='b', linewidth=0.1)
 
     plt.show()
+
+def agregarMediciones(dirName) -> list:
+    dirList = os.listdir(dirName)
+    listMediciones = []
+
+    for carpeta in dirList:
+        dirNodo = os.path.join(dirName, carpeta)  # join the path
+        #os.chdir(full_path)  # change directory to the desired path
+        listMediciones.append(Medicion(dirNodo))
+
+    return listMediciones
+
+if __name__ == '__main__':
+
+    # Los siguientes valores dependen de la sensibilidad utilizada
+    ESCALA_ACELERACION = 16384
+    ESCALA_GIROSCOPO = 131
+    dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
+    listMediciones = agregarMediciones(dirName)
+    for medicion in listMediciones:
+        medicion.leerMediciones()
+        medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
+        medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
+
+    graficarMediciones(listMediciones[1])
+
+
 
 
 
