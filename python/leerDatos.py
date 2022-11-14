@@ -1,16 +1,17 @@
-import os.path, math
+import os, math
 import numpy as np
 import struct
 import matplotlib.pyplot as plt
 
 class Medicion:
-    def __init__(self, fileName) -> None:
-        if not os.path.exists(fileName):
-            print("No existe el archivo")
+    def __init__(self, dirName) -> None:
+        #si no existe el directori, sale
+        if not os.path.exists(dirName):
+            print("ERROR: No existe el directorio")
             exit()
         
-        self.fileName = fileName
-
+        #define los atributos basicos de la Medicion
+        self.dirName = dirName
 
         self.accelerationX = []
         self.accelerationY = []
@@ -28,53 +29,62 @@ class Medicion:
         self.BYTES_ENCABEZADO = 23
     
     def __str__(self) -> str:
-        return self.fileName[-67:]
+        return self.dirName[-67:]
 
     def leerMediciones(self) -> None:
-        self.file = open(self.fileName,"rb")
-        self.file.read(self.BYTES_ENCABEZADO) #tira los datos del encabezado
+        #Busca todos los archivos dentro del directorio para apenderlos a la medicion
+        #El ESP genera archivos de a 3000 mediciones (1min de grabacion)
+        dirList = os.listdir(self.dirName)
+        for archivo in dirList:
+            self.leerArchivoMediciones(self.dirName+"\\"+archivo)
+    
+    def leerArchivoMediciones(self, fileName) -> None:
+        file = open(fileName,"rb")
+        file.read(self.BYTES_ENCABEZADO) #tira los datos del encabezado
 
-        byte = self.file.read(self.BYTES_MUESTRA)
-        i=1
-        while byte:
-            self.agregarMediciones(byte,i)
-            i+=1
-            byte = self.file.read(self.BYTES_MUESTRA)
+        muestra = file.read(self.BYTES_MUESTRA)
+        while muestra:
+            #por cada byte que lee lo apendea
+            self.agregarMediciones(muestra)
+            muestra = file.read(self.BYTES_MUESTRA)
+        
+        file.close()
 
-    def agregarMediciones(self, byte,i) -> None:
+    def agregarMediciones(self, muestra) -> None:
         # toma bytes de a dos valores uint8 + uint8 -> int16
         '''
         cada byte es una medicion de lo siguiente campos
-        ACCEL_XOUT_H = byte[1];
-        ACCEL_XOUT_L = byte[2];
-        ACCEL_YOUT_H = byte[3];
-        ACCEL_YOUT_L = byte[4];
-        ACCEL_ZOUT_H = byte[5];
-        ACCEL_ZOUT_L = byte[6];
+        ACCEL_XOUT_H = muestra[1];
+        ACCEL_XOUT_L = muestra[2];
+        ACCEL_YOUT_H = muestra[3];
+        ACCEL_YOUT_L = muestra[4];
+        ACCEL_ZOUT_H = muestra[5];
+        ACCEL_ZOUT_L = muestra[6];
 
-        TEMP_OUT_H = byte[7];
-        TEMP_OUT_L = byte[8];
+        TEMP_OUT_H = muestra[7];
+        TEMP_OUT_L = muestra[8];
 
-        GYRO_XOUT_H = byte[9];
-        GYRO_XOUT_L = byte[10];
-        GYRO_YOUT_H = byte[11];
-        GYRO_YOUT_L = byte[12];
-        GYRO_ZOUT_H = byte[13];
-        GYRO_ZOUT_L = byte[14];
+        GYRO_XOUT_H = muestra[9];
+        GYRO_XOUT_L = muestra[10];
+        GYRO_YOUT_H = muestra[11];
+        GYRO_YOUT_L = muestra[12];
+        GYRO_ZOUT_H = muestra[13];
+        GYRO_ZOUT_L = muestra[14];
         '''
-        if len(byte) != 14:
+        if len(muestra) != 14:
             return
-        unpackedByte = struct.unpack('7h', byte)
 
-        self.accelerationX.append(unpackedByte[0])
-        self.accelerationY.append(unpackedByte[1])
-        self.accelerationZ.append(unpackedByte[2])
+        listaMuestras = struct.unpack('7h', muestra)
 
-        self.temp.append(unpackedByte[3])
+        self.accelerationX.append(listaMuestras[0])
+        self.accelerationY.append(listaMuestras[1])
+        self.accelerationZ.append(listaMuestras[2])
 
-        self.gyroscopeX.append(unpackedByte[4])
-        self.gyroscopeY.append(unpackedByte[5])
-        self.gyroscopeZ.append(unpackedByte[6])
+        self.temp.append(listaMuestras[3])
+
+        self.gyroscopeX.append(listaMuestras[4])
+        self.gyroscopeY.append(listaMuestras[5])
+        self.gyroscopeZ.append(listaMuestras[6])
 
     def cambiarEscalaGyroscopo(self, escala):
         self.gyroscopeX = [ x/escala for x in self.gyroscopeX]
@@ -86,11 +96,11 @@ class Medicion:
         self.accelerationY = [ x/escala for x in self.accelerationY]
         self.accelerationZ = [ x/escala for x in self.accelerationZ]
     
-    def cantidadMediciones(self) -> int:
+    def cantidadMediciones(self,fileName) -> int:
         # numero de muestras tomadas
-        muestras = math.ceil(os.fstat(self.fileName.fileno()).st_size / self.BYTES_MUESTRA)
-        muestras = muestras-2
-        return muestras
+        cantMuestras = math.ceil(os.fstat(fileName.fileno()).st_size / self.BYTES_MUESTRA)
+        cantMuestras -=2
+        return cantMuestras
         
 
 if __name__ == '__main__':
@@ -98,8 +108,8 @@ if __name__ == '__main__':
     # Los siguientes valores dependen de la sensibilidad utilizada
     ESCALA_ACELERACION = 16384
     ESCALA_GIROSCOPO = 131
-    fileName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025\\nodo_94b97eda7f38\\25-0.DAT"
-    medicion = Medicion(fileName)
+    dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025\\nodo_94b97eda7f38"
+    medicion = Medicion(dirName)
     medicion.leerMediciones()
     medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
     medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
