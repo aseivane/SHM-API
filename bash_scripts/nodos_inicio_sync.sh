@@ -18,7 +18,7 @@ archivo2="./mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
 
 echo "Archivo de confirmación: "
 echo $archivo2
-
+echo "Epoch mosquito $epoch_inicio"
 echo "Enviando mensaje de inicio"
 # Enviar mensaje de inicio a los nodos 
 mosquitto_pub -t $topic1 -h $broker -p $port -m "$epoch_inicio $duracion $nro_medicion" -u $usr -P $pass # argumentos: $1 EPOCH inicio, $2 duracion, $3 nro de medicion
