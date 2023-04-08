@@ -38,8 +38,8 @@ var bodyParser = require("body-parser");
 var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
-
-var ip_mqtt_broker = '192.168.0.10';
+var moment = require('moment')
+var ip_mqtt_broker = '192.168.100.98';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 
@@ -49,6 +49,7 @@ const { spawn } = require("child_process"); // Para ejecutar scripts en un proce
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use(express.json())
 app.use(express.static('public'));
 
 app.get('/',function(req,res){
@@ -67,7 +68,10 @@ app.post('/form_config_sistema',function(req,res){
     console.log("IP del Broker: " + req.body.ip_mqtt);
     console.log("Usuario: " + req.body.usr_mqtt);
     console.log("Passwd: "+ req.body.pass_mqtt);
-    
+    const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
+    console.log(initTime)
+    console.log(req.body.epoch_inicio)
+console.log(moment().add(req.body.epoch_inicio, 'minutes').format('x'))
     ip_mqtt_broker = req.body.ip_mqtt;
     usuario_mqtt = req.body.usr_mqtt;
     pass_mqtt = req.body.pass_mqtt;
@@ -108,7 +112,11 @@ app.post('/form_inicio',function(req,res){
     
     if (req.body.sync == "SI"){
         console.log("Muestreo SINCRONIZADO");
-        shell.exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.epoch_inicio +' ');
+       // const initTime = moment().add(req.body.epoch_inicio, 'minutes').format('x')
+       const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
+ 
+       console.log(initTime, req.body.epoch_inicio)
+        shell.exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ initTime +' ');
     }
     else if(req.body.sync == "NO"){
         console.log("Muestreo NO SINCRONIZADO");
