@@ -26,7 +26,6 @@ def agregarMediciones(dirName) -> list:
 
     for carpeta in dirList:
         dirNodo = os.path.join(dirName, carpeta)  # join the path
-        #os.chdir(full_path)  # change directory to the desired path
         listMediciones.append(Medicion(dirNodo))
 
     return listMediciones
@@ -34,7 +33,7 @@ def agregarMediciones(dirName) -> list:
 if __name__ == '__main__':
 
     # Los siguientes valores dependen de la sensibilidad utilizada
-    ESCALA_ACELERACION = 16384
+    ESCALA_ACELEROMETRO = 16384
     ESCALA_GIROSCOPO = 131
 
     dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     for medicion in listMediciones:
         medicion.leerMediciones()
         medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
-        medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
+        medicion.cambiarEscalaAcelerometro(ESCALA_ACELEROMETRO)
         medicion.exportarCSV()
 
     graficarMediciones(listMediciones[1])
