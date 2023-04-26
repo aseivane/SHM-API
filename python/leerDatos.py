@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from Medicion import Medicion
-import os, sys
+import os
+import argparse
 
 def graficarMediciones(medicion):
     fig, ax = plt.subplots(2,1)
@@ -15,7 +16,7 @@ def graficarMediciones(medicion):
 
     plt.show()
 
-def listaMediciones(dirName) -> list:
+def agregarMediciones(dirName) -> list:
     dirList = os.listdir(dirName)
     listMediciones = []
 
@@ -23,29 +24,37 @@ def listaMediciones(dirName) -> list:
         dirNodo = os.path.join(dirName, carpeta)  # join the path
         listMediciones.append(Medicion(dirNodo))
 
-    return listMediciones
+    return listMediciones 
+
+
+def configParser(parser):
+    parser.add_argument('-i', '--images', type=str, metavar='dir', dest='imageDir',
+                    help='Crea imagenes de las mediciones en la carpeta indicada')
+    parser.add_argument('-l', '--list', type=str, metavar='dir', dest='listDir',
+                    help='Lista los archivos de la carpeta indicada')
 
 if __name__ == '__main__':
 
-    flags = ("-f", "-l")
+    parser = argparse.ArgumentParser(prog='leer-mediciones')
+    configParser(parser)
+    args=vars(parser.parse_args())
 
-    # Los siguientes valores dependen de la sensibilidad utilizada
-    try:
-        argFlag = sys.argv[1]
-    except IndexError:
-        raise SystemExit(f"python leerDatos.py -f <carpeta mediciones> ")
-    
-    if not argFlag in flags:
-        raise SystemExit(f"Unknown flag \"{argFlag}\"")
-    
-    try:
-        argDir = sys.argv[2]
-    except IndexError:
-        raise SystemExit(f"Falta directorio") 
+    if args['imageDir'] is not None:
+         flag = 'imageDir'
+         dirName = args['imageDir']
+    else:
+         flag = 'listDir'
+         dirName = args['listDir']
+        
+    if not os.path.isdir(dirName):
+            raise SystemExit(f"No existe la carpeta") 
 
-    if not os.path.isdir(argDir):
-        raise SystemExit(f"No existe la carpeta") 
     
+
+    listMediciones = agregarMediciones(dirName)
+
+    print(listMediciones)
+
     '''
     ESCALA_ACELEROMETRO = 16384
     ESCALA_GIROSCOPO = 131
