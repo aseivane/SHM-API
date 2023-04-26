@@ -1,26 +1,21 @@
 import matplotlib.pyplot as plt
 from Medicion import Medicion
-import os
+import os, sys
 
 def graficarMediciones(medicion):
-    fig, ax = plt.subplots(3,1)
+    fig, ax = plt.subplots(2,1)
 
     ax[0].set_title("Acelerometro")
     ax[0].plot(medicion.accelerationX, color='b', linewidth=0.1)
     ax[0].plot(medicion.accelerationY, color='r', linewidth=0.1)
     ax[0].plot(medicion.accelerationZ, color='g', linewidth=0.1)
-
-    ax[1].set_title("Giroscopo")
-    ax[1].plot(medicion.gyroscopeX, color='b', linewidth=0.1)
-    ax[1].plot(medicion.gyroscopeY, color='r', linewidth=0.1)
-    ax[1].plot(medicion.gyroscopeZ, color='g', linewidth=0.1)
     
-    ax[2].set_title("Temperatura")
-    ax[2].plot(medicion.temp, color='b', linewidth=0.1)
+    ax[1].set_title("Temperatura")
+    ax[1].plot(medicion.temp, color='b', linewidth=0.1)
 
     plt.show()
 
-def agregarMediciones(dirName) -> list:
+def listaMediciones(dirName) -> list:
     dirList = os.listdir(dirName)
     listMediciones = []
 
@@ -32,7 +27,26 @@ def agregarMediciones(dirName) -> list:
 
 if __name__ == '__main__':
 
+    flags = ("-f", "-l")
+
     # Los siguientes valores dependen de la sensibilidad utilizada
+    try:
+        argFlag = sys.argv[1]
+    except IndexError:
+        raise SystemExit(f"python leerDatos.py -f <carpeta mediciones> ")
+    
+    if not argFlag in flags:
+        raise SystemExit(f"Unknown flag \"{argFlag}\"")
+    
+    try:
+        argDir = sys.argv[2]
+    except IndexError:
+        raise SystemExit(f"Falta directorio") 
+
+    if not os.path.isdir(argDir):
+        raise SystemExit(f"No existe la carpeta") 
+    
+    '''
     ESCALA_ACELEROMETRO = 16384
     ESCALA_GIROSCOPO = 131
 
@@ -42,11 +56,11 @@ if __name__ == '__main__':
     
     for medicion in listMediciones:
         medicion.leerMediciones()
-        medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
         medicion.cambiarEscalaAcelerometro(ESCALA_ACELEROMETRO)
         medicion.exportarCSV()
 
-    graficarMediciones(listMediciones[1])
+    #graficarMediciones(listMediciones[1])
+    '''
 
 
 
