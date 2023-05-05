@@ -72,23 +72,6 @@ if __name__ == '__main__':
 
 
 
-    '''
-
-
-    dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
-    
-    listMediciones = agregarMediciones(dirName)
-    
-    for medicion in listMediciones:
-        medicion.leerMediciones()
-        medicion.cambiarEscalaAcelerometro(ESCALA_ACELEROMETRO)
-        medicion.exportarCSV()
-
-    #graficarMediciones(listMediciones[1])
-    '''
-
-
-
 
 
 
