@@ -1,6 +1,7 @@
 import os, math, csv
-import numpy as np
 import struct
+import matplotlib.pyplot as plt
+
 
 class Medicion:
     def __init__(self, dirName) -> None:
@@ -11,6 +12,10 @@ class Medicion:
         
         #define los atributos basicos de la Medicion
         self.dirName = dirName
+        dirObjects = dirName.split('\\')
+
+        self.nodo = dirObjects.pop(-1)
+        self.medicion = dirObjects.pop(-2)
 
         self.accelerationX = []
         self.accelerationY = []
@@ -82,6 +87,17 @@ class Medicion:
         cantMuestras = math.ceil(os.fstat(fileName.fileno()).st_size / self.BYTES_MUESTRA)
         cantMuestras -=2
         return cantMuestras
+    
+    
+    def graficar(self):
+        fig, ax = plt.subplots(3,1)
+
+        ax[0].set_title("Acelerometro")
+        ax[0].plot(self.accelerationX, color='b', linewidth=0.1)
+        ax[0].plot(self.accelerationY, color='r', linewidth=0.1)
+        ax[0].plot(self.accelerationZ, color='g', linewidth=0.1)
+
+        #plt.savefig()
     
     def exportarCSV(self):
         csvName = self.dirName.split("\\")[-1] + ".csv"
