@@ -45,9 +45,12 @@ if __name__ == '__main__':
     else:
          flag = 'listDir'
          dirName = args['listDir']
-        
+
+    if not dirName:
+        raise SystemExit(f"Ingrese carpeta con mediciones") 
+    
     if not os.path.isdir(dirName):
-            raise SystemExit(f"No existe la carpeta") 
+        raise SystemExit(f"No existe la carpeta \"{dirName}\"") 
 
     
 
