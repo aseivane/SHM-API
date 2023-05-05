@@ -32,35 +32,48 @@ def configParser(parser):
                     help='Crea imagenes de las mediciones en la carpeta indicada')
     parser.add_argument('-l', '--list', type=str, metavar='dir', dest='listDir',
                     help='Lista los archivos de la carpeta indicada')
-
-if __name__ == '__main__':
+    
+def main():
+    ESCALA_ACELERACION = 16384
+    ESCALA_GIROSCOPO = 131
 
     parser = argparse.ArgumentParser(prog='leer-mediciones')
     configParser(parser)
     args=vars(parser.parse_args())
 
-    if args['imageDir'] is not None:
-         flag = 'imageDir'
-         dirName = args['imageDir']
-    else:
-         flag = 'listDir'
-         dirName = args['listDir']
+    if args['imageDir'] is not None :
+        dirName = args['imageDir']
+
+        listMediciones = agregarMediciones(dirName)
+    
+        for medicion in listMediciones:
+            medicion.leerMediciones()
+            medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
+            medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
+            medicion.exportarCSV()
+            medicion.graficar()
+
+    elif args['listDir'] is not None:
+        dirName = args['listDir']
+        return os.listdir(dirName)
 
     if not dirName:
         raise SystemExit(f"Ingrese carpeta con mediciones") 
     
     if not os.path.isdir(dirName):
         raise SystemExit(f"No existe la carpeta \"{dirName}\"") 
-
     
 
-    listMediciones = agregarMediciones(dirName)
 
-    print(listMediciones)
+if __name__ == '__main__':
+
+    main()
+
+
+
 
     '''
-    ESCALA_ACELEROMETRO = 16384
-    ESCALA_GIROSCOPO = 131
+
 
     dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
     
