@@ -90,14 +90,14 @@ class Medicion:
     
     
     def graficar(self):
-        fig, ax = plt.subplots(3,1)
+        fig, ax = plt.subplots()
 
-        ax[0].set_title("Acelerometro")
-        ax[0].plot(self.accelerationX, color='b', linewidth=0.1)
-        ax[0].plot(self.accelerationY, color='r', linewidth=0.1)
-        ax[0].plot(self.accelerationZ, color='g', linewidth=0.1)
+        ax.set_title("Acelerometro")
+        ax.plot(self.accelerationX, color='b', linewidth=0.1)
+        ax.plot(self.accelerationY, color='r', linewidth=0.1)
+        ax.plot(self.accelerationZ, color='g', linewidth=0.1)
 
-        #plt.savefig()
+        plt.savefig(self.dirName + '\\' + self.nodo)
     
     def exportarCSV(self):
         csvName = self.dirName.split("\\")[-1] + ".csv"
