@@ -39,18 +39,20 @@ var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
 var moment = require('moment')
-var ip_mqtt_broker = '192.168.100.98';
+
+var ip_mqtt_broker = '192.168.0.10';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 
 var app = express();
 const shell = require('shelljs')
-const { spawn } = require("child_process"); // Para ejecutar scripts en un proceso nuevo
+//const { spawn } = require("child_process"); // Para ejecutar scripts en un proceso nuevo
+const spawn = require('await-spawn')
 const exec = require('await-exec')
 
+app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use(express.json())
 app.use(express.static('public'));
 
 app.get('/',function(req,res){
@@ -64,37 +66,49 @@ res.sendfile("index.html");
 });
 
 app.post('/form_config_sistema',function(req,res){
-    console.log("Formulario completado:");
-    
+    console.log("Formulario de configuración completado:");
     ip_mqtt_broker = req.body.ip_mqtt;
     usuario_mqtt = req.body.usr_mqtt;
     pass_mqtt = req.body.pass_mqtt;
+
+
+/*
+    else if(req.body.sync == "NO"){
+        console.log("Muestreo NO SINCRONIZADO");
+        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
+    }
+  */  
    
-    return res.status(200);
+    res.redirect('back');
 
 });
+
 
 app.post('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
 
 
-    try {
-        const bl = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-        console.log('bl', bl)
-      } catch (e) {
-        console.log(e)
+   //let response = await shell.exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //bloqueante
+  //  spawn('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //spawn funciona en segundo plano
+   
 
-        return res.status(422).json(e)
-      }
-    
-    
-      return res.status(200).json({test: 'test'});
-    
+try {
+    const bl = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+    console.log(bl)
+  } catch (e) {
+    console.log(e)
+  }
+
+
+  return res.status(200).json({test: 'test'});
+
   //  res.end("yes");
 });
 
-app.post('/form_inicio',async function(req,res){
+app.post('/form_inicio',function(req,res){
     console.log("Formulario completado:");
+
+  //  console.log("Datos Formulario: " + req.body);
 
     console.log("Epoch inicio: " + req.body.epoch_inicio);
     console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
@@ -103,72 +117,53 @@ app.post('/form_inicio',async function(req,res){
     
     if (req.body.sync == "SI"){
         console.log("Muestreo SINCRONIZADO");
-       // const initTime = moment().add(req.body.epoch_inicio, 'minutes').format('x')
-       const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
-       try {
-        const bl = await exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ initTime +' ');
-        return res.status(422);
-    } catch (e) {
-        console.log(e)
-      }
+        shell.exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ req.body.epoch_inicio +' ');
     }
     else if(req.body.sync == "NO"){
         console.log("Muestreo NO SINCRONIZADO");
+        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
+    }
+    
+   
+    res.redirect('back');
 
-        try {
-            const bl = await exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
-        } catch (e) {
-            console.log(e)
-            return res.status(422);
-
-        }
-    }   
-     return res.status(200);
-
+//    res.send("Muestreo iniciado");
+//    res.end("yes");
 });
 
 
 app.post('/cancelar_muestreo',async function(req,res){
     console.log("Boton apretado: Cancelar muestreo");
 
-    try {
-        const bl = await exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
-    } catch (e) {
-        console.log(e)
-        return res.status(422);
+   // shell.exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
+    
+   // start the `ping google.com` command
+try {
+    const bl = await exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+    console.log(bl)
+  } catch (e) {
+    console.log(e)
+  }
+   res.redirect('back');
 
-    }
-    return res.status(200);
-
+//    res.send("Cancelado");
 });
 
 
-app.post('/reiniciar_nodos',async function(req,res){
+app.post('/reiniciar_nodos',function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
-
-    try {
-        const bl = await exec('./bash_scripts/reiniciar_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
-    } catch (e) {
-        console.log(e)
-        return res.status(422);
-
-    }
-    return res.status(200);
+    shell.exec('./bash_scripts/reiniciar_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
+//    res.send("Reiniciados");
+    res.redirect('back');
 
 });
 
 
-app.post('/borrar_SD',async function(req,res){
+app.post('/borrar_SD',function(req,res){
     console.log("Boton apretado: Borrar los archivos de los nodos");
-
-    try {
-        const bl = await exec('./bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
-    } catch (e) {
-        console.log(e)
-        return res.status(422);
-
-    }
-    return res.status(200);
+    shell.exec('./bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
+//    res.send("Reiniciados");
+    res.redirect('back');
 
 });
 
@@ -177,6 +172,13 @@ app.post('/Descargar_datos',function(req,res){
     zipper.sync.zip("./mediciones/").compress().save("mediciones.zip");
 
     res.download('mediciones.zip');   
+
+    /*
+    fs.unlink('mediciones.zip', function (err) {
+        if (err) throw err;
+        console.log('File deleted!');
+      });
+      */
 });
 
 
@@ -186,7 +188,6 @@ app.post('/Descargar_datos',function(req,res){
 // The serveIndex is this module serving the directory
 app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
 
-app.listen(3001,function(){
-console.log("Servidor WEB iniciado en el puerto 3001");
+app.listen(3000,function(){
+console.log("Servidor WEB iniciado en el puerto 3000");
 })
-
