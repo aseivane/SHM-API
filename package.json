@@ -4,13 +4,14 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon --exec node app.js",
+    "start": "nodemon --exec node cluster.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "await-exec": "^0.1.2",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "moment": "^2.29.4",
@@ -19,5 +20,9 @@
     "serve-index": "^1.9.1",
     "shelljs": "^0.8.4",
     "zip-local": "^0.3.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.40.0",
+    "nodemon": "^2.0.22"
   }
 }
