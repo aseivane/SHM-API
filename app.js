@@ -42,6 +42,7 @@ var moment = require('moment')
 var ip_mqtt_broker = '192.168.1.230';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
+const csvtojson = require("csvtojson/v2");
 
 const processData_initMedicion = {}
  
@@ -69,15 +70,30 @@ app.post('/form_config_sistema',function(req,res){
 
 app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
-   let response 
+   let response = {}
 
     try {
         response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
       } catch (e) {
         return res.status(422).json(e)
       }
+
+    if(response.stderr){
+        return res.status(422).json({errorMessage: response.stderr})
+    }
+    let result = []
+
+    try {
+    const csvFilePath='./public/datos/estado/tabla_nodos_inicio.csv'
+    await csvtojson().fromFile(csvFilePath)
+                        .then((jsonObj)=>{
+                            result = jsonObj
+                        })
+    } catch (e) {
+        return res.status(422).json({error: e})
+    }
          
-      return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', url: 'http://localhost:3001/datos/estado/tabla_nodos_inicio.csv'});
+      res.status(200).json({status: 'ok', url: 'http://localhost:3001/datos/estado/tabla_nodos_inicio.csv', data: result});
 });
 
 app.post('/form_inicio',async function(req,res){
@@ -193,7 +209,7 @@ app.post('/erase_images',async function(req,res){
 app.post('/reset_tabla_nodos',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datas/estado');
+        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -205,7 +221,7 @@ app.post('/reset_tabla_nodos',async function(req,res){
 app.post('/graph_readings',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datas/estado');
+        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
     } catch (e) {
         return res.status(422).json({error: e});
 

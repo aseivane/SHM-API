@@ -10,10 +10,9 @@ pass=$3
 
 topic2="nodo/estado"
 
-# archivo1="public/datos/estado/mensajes_mqtt.log"
-# archivo2="public/datos/estado/tabla_nodos_inicio.csv"
-archivo1="nodos/mensajes_mqtt.log"
-archivo2="nodos/tabla_nodos_inicio.csv"
+archivo1="public/datos/estado/mensajes_mqtt.log"
+archivo2="public/datos/estado/tabla_nodos_inicio.csv"
+
 
 echo "AVERIGUANDO ESTADO DE LOS NODOS"
 
@@ -21,6 +20,7 @@ echo "AVERIGUANDO ESTADO DE LOS NODOS"
 if test -f "$archivo2"; then
     rm $archivo2
 fi
+echo "id,ip,rssi,type,sync,time,state" > $archivo2; 
 
 # Preguntar por el estado de los nodos
 mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
