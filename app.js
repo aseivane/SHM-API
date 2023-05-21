@@ -54,6 +54,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json())
 app.use(express.static('public'));
 
+const cors = require('cors');
+const corsOptions ={
+    origin:'http://localhost:3002', 
+    credentials:false,            //access-control-allow-credentials:true
+    optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
+
 app.post('/form_config_sistema',function(req,res){
     console.log("Formulario completado:");
     console.log("IP del Broker: " + req.body.ip_mqtt);
@@ -72,15 +80,15 @@ app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
    let response = {}
 
-    try {
-        response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-      } catch (e) {
-        return res.status(422).json(e)
-      }
+    // try {
+    //     response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+    //   } catch (e) {
+    //     return res.status(422).json(e)
+    //   }
 
-    if(response.stderr){
-        return res.status(422).json({errorMessage: response.stderr})
-    }
+    // if(response.stderr){
+    //     return res.status(422).json({errorMessage: response.stderr})
+    // }
     let result = []
 
     try {
