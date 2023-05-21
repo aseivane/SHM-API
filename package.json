@@ -20,7 +20,8 @@
     "save": "^2.4.0",
     "serve-index": "^1.9.1",
     "shelljs": "^0.8.4",
-    "zip-local": "^0.3.4"
+    "zip-local": "^0.3.4",
+    "nodemon": "^2.0.22"
   },
   "devDependencies": {
     "eslint": "^8.40.0",
