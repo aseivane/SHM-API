@@ -181,11 +181,11 @@ app.post('/borrar_SD',async function(req,res){
 
 });
 
-app.get('/Descargar_datos',function(req,res){
+app.get('/download_files',function(req,res){
     console.log("Boton apretado: Descargar datos");
-    zipper.sync.zip("./mediciones/").compress().save("mediciones.zip");
-   
-    res.download('mediciones.zip');   
+    zipper.sync.zip("./public/datos/downloads").compress().save("mediciones.zip");
+    res.status(200).json({status: 'ok', url: 'mediciones.zip'});
+    // res.download('mediciones.zip');   
 });
 
 app.get('/download_image/:imgName',function(req,res){
