@@ -12,7 +12,10 @@ RUN adduser --system --uid 1001 nodejs
 # where available (npm@5+)
 COPY package*.json ./
 
-RUN npm install
+RUN \
+    if [ -f package-lock.json ]; then npm ci; \
+    else npm install; \
+    fi
 # If you are building your code for production
 #RUN npm ci --omit=dev
 
