@@ -80,15 +80,15 @@ app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
    let response = {}
 
-    // try {
-    //     response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-    //   } catch (e) {
-    //     return res.status(422).json(e)
-    //   }
+    try {
+        response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+      } catch (e) {
+        return res.status(422).json(e)
+      }
 
-    // if(response.stderr){
-    //     return res.status(422).json({errorMessage: response.stderr})
-    // }
+    if(response.stderr){
+        return res.status(422).json({errorMessage: response.stderr})
+    }
     let result = []
 
     try {
@@ -111,12 +111,13 @@ app.post('/form_inicio',async function(req,res){
     console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
     console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
     console.log("Muestreo sincronizado: " + req.body.sync);
+
     
     let response
 
     if (req.body.sync == "SI"){
         console.log("Muestreo SINCRONIZADO");
-        const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
+        const initTime = moment().add(req.body.epoch_inicio, req.body.initUnit).unix()
         try {
         response = await exec('./bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ initTime +' ');
         } catch (e) {
