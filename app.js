@@ -52,13 +52,15 @@ const exec = require('./src/utils/exect_pid')
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.json())
+// app.use(express.static('public'), serveIndex('public', {'icons': true}));
 app.use(express.static('public'));
-
 const cors = require('cors');
 const corsOptions ={
-    origin:'http://localhost:3002', 
+    origin:'*', 
     credentials:false,            //access-control-allow-credentials:true
-    optionSuccessStatus:200
+    optionSuccessStatus:200,
+    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+
 }
 app.use(cors(corsOptions));
 
@@ -80,15 +82,15 @@ app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
    let response = {}
 
-    try {
-        response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-      } catch (e) {
-        return res.status(422).json(e)
-      }
+    // try {
+    //     response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+    //   } catch (e) {
+    //     return res.status(422).json(e)
+    //   }
 
-    if(response.stderr){
-        return res.status(422).json({errorMessage: response.stderr})
-    }
+    // if(response.stderr){
+    //     return res.status(422).json({errorMessage: response.stderr})
+    // }
     let result = []
 
     try {
@@ -183,9 +185,8 @@ app.post('/borrar_SD',async function(req,res){
 
 app.get('/download_files',function(req,res){
     console.log("Boton apretado: Descargar datos");
-    zipper.sync.zip("./public/datos/downloads").compress().save("mediciones.zip");
-    res.status(200).json({status: 'ok', url: 'mediciones.zip'});
-    // res.download('mediciones.zip');   
+    zipper.sync.zip("./mediciones/").compress().save("./downloads/mediciones.zip");
+     res.download('mediciones.zip');   
 });
 
 app.get('/download_image/:imgName',function(req,res){
@@ -243,7 +244,8 @@ app.post('/graph_readings',async function(req,res){
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory
 app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
-app.use('/nodos', express.static('nodos'))
+app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
+
 
 app.listen(3001,function(){
 console.log("Servidor WEB iniciado en el puerto 3001");
