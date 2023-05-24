@@ -38,7 +38,7 @@ var bodyParser = require("body-parser");
 var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
-var moment = require('moment')
+
 var ip_mqtt_broker = '192.168.1.230';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
@@ -58,11 +58,10 @@ const corsOptions ={
     origin:'*', 
     credentials:false,            //access-control-allow-credentials:true
     optionSuccessStatus:200,
-    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
+    // methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
 
 }
 app.use(cors(corsOptions));
-app.use(express.static('public'), serveIndex('public', {'icons': true}));
 
 app.post('/form_config_sistema',function(req,res){
     console.log("Formulario completado:");
@@ -243,6 +242,7 @@ app.post('/graph_readings',async function(req,res){
 // The serveIndex is this module serving the directory
 // app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
 // app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
+app.use(express.static('public'), serveIndex('public', {'icons': true}));
 
 
 app.listen(3001,function(){
