@@ -52,8 +52,7 @@ const exec = require('./src/utils/exect_pid')
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.json())
-// app.use(express.static('public'), serveIndex('public', {'icons': true}));
-app.use(express.static('public'));
+
 const cors = require('cors');
 const corsOptions ={
     origin:'*', 
@@ -63,6 +62,7 @@ const corsOptions ={
 
 }
 app.use(cors(corsOptions));
+app.use(express.static('public'), serveIndex('public', {'icons': true}));
 
 app.post('/form_config_sistema',function(req,res){
     console.log("Formulario completado:");
@@ -82,15 +82,16 @@ app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
    let response = {}
 
-    // try {
-    //     response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-    //   } catch (e) {
-    //     return res.status(422).json(e)
-    //   }
+    try {
+        response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+      } catch (e) {
+        return res.status(422).json(e)
+      }
 
-    // if(response.stderr){
-    //     return res.status(422).json({errorMessage: response.stderr})
-    // }
+    if(response.stderr){
+        return res.status(422).json({errorMessage: response.stderr})
+    }
+    
     let result = []
 
     try {
@@ -114,23 +115,21 @@ app.post('/form_inicio',async function(req,res){
     console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
     console.log("Muestreo sincronizado: " + req.body.sync);
 
-    
+    const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
     let response
 
-    if (req.body.sync == "SI"){
+    if (sync){
         console.log("Muestreo SINCRONIZADO");
-        const initTime = moment().add(req.body.epoch_inicio, req.body.initUnit).unix()
         try {
-        response = await exec('./bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ initTime +' ');
+        response = await exec('./bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' '+ epoch_inicio +' ', processData_initMedicion);
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
         }
     }
-    else if(req.body.sync == "NO"){
+    else {
         console.log("Muestreo NO SINCRONIZADO");
-
         try {
-            response = await exec('./bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ', processData_initMedicion);
+            response = await exec('./bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
         } catch (e) {            
             return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
 
@@ -138,7 +137,6 @@ app.post('/form_inicio',async function(req,res){
     }   
      
     return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Medicion finalizadas'});
-
 });
 
 
@@ -185,7 +183,7 @@ app.post('/borrar_SD',async function(req,res){
 
 app.get('/download_files',function(req,res){
     console.log("Boton apretado: Descargar datos");
-    zipper.sync.zip("./mediciones/").compress().save("./downloads/mediciones.zip");
+    zipper.sync.zip("./public/datos/mediciones/").compress().save("./public/datos/downloads/mediciones.zip");
      res.download('mediciones.zip');   
 });
 
@@ -243,8 +241,8 @@ app.post('/graph_readings',async function(req,res){
 // Serve URLs like /ftp/thing as public/ftp/thing
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory
-app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
-app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
+// app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
+// app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
 
 
 app.listen(3001,function(){
