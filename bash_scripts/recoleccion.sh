@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Parametros iniciales
 broker=$1
