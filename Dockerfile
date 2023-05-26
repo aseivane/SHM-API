@@ -2,7 +2,7 @@ FROM node:18-alpine
 
 # Create app directory
 WORKDIR /app
-
+RUN apk add --no-cache mosquitto-clients bash
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
@@ -29,7 +29,7 @@ COPY mediciones ./mediciones
 COPY python ./python
 
 RUN chown -R node /app/node_modules
-USER nodejs
+#USER nodejs
 
 
 CMD [ "npm", "run", "start" ]
