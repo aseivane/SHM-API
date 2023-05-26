@@ -14,10 +14,10 @@ epoch_inicio=$6
 nro_medicion_ext=`printf %03d "$nro_medicion"` 
 
 tout_inicio_s=0
-directorio="mediciones/medicion_$nro_medicion_ext"
-archivo1="mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo2="mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
-archivo3="mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
+directorio="/app/public/datos/mediciones/medicion_$nro_medicion_ext"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
+archivo3="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
 n=0
 k=0
 

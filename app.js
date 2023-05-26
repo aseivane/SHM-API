@@ -120,7 +120,7 @@ app.post('/form_inicio',async function(req,res){
     if (sync){
         console.log("Muestreo SINCRONIZADO");
         try {
-        response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' '+ epoch_inicio +' ', processData_initMedicion);
+        response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
         }
@@ -145,6 +145,7 @@ app.post('/cancelar_muestreo',async function(req,res){
     
     try {
         const pid = processData_initMedicion?.pid
+        console.log(pid)
         response = await exec('sh /app/bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + pid);
     } catch (e) {
         return res.status(422).json({error: e});
@@ -183,7 +184,7 @@ app.post('/borrar_SD',async function(req,res){
 app.get('/download_files',function(req,res){
     console.log("Boton apretado: Descargar datos");
     zipper.sync.zip("./public/datos/mediciones/").compress().save("./public/datos/downloads/mediciones.zip");
-     res.download('mediciones.zip');   
+     res.download('./public/datos/downloads/mediciones.zip');   
 });
 
 app.get('/download_image/:imgName',function(req,res){

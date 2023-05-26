@@ -12,8 +12,8 @@ nro_medicion=$5
 topic1="control/inicio_muestreo_async"
 
 nro_medicion_ext=`printf %03d $nro_medicion`
-archivo1="./mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo2="./mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
 
 
 echo $archivo2
