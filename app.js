@@ -38,148 +38,215 @@ var bodyParser = require("body-parser");
 var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
-var moment = require('moment')
-var ip_mqtt_broker = '192.168.100.98';
+
+var ip_mqtt_broker = 'mosquitto.shm.com';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
+const csvtojson = require("csvtojson/v2");
 
+const processData_initMedicion = {}
+ 
 var app = express();
-const shell = require('shelljs')
-const { spawn } = require("child_process"); // Para ejecutar scripts en un proceso nuevo
+const exec = require('./src/utils/exect_pid')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(express.json())
-app.use(express.static('public'));
 
-app.get('/',function(req,res){
+const cors = require('cors');
+const corsOptions ={
+    origin:'*', 
+    credentials:false,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+    // methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH']
 
-//    res.render('index.pug', { name: 'John Doe', age: 21 });
-
-  //  res.render(__dirname + "index.html", {name:ip_mqtt_broker});
-
-res.sendfile("index.html");
-//res.sendfile("./");
-});
+}
+app.use(cors(corsOptions));
 
 app.post('/form_config_sistema',function(req,res){
-    console.log("Formulario de configuración completado:");
-
+    console.log("Formulario completado:");
     console.log("IP del Broker: " + req.body.ip_mqtt);
     console.log("Usuario: " + req.body.usr_mqtt);
     console.log("Passwd: "+ req.body.pass_mqtt);
-    const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
-    console.log(initTime)
-    console.log(req.body.epoch_inicio)
-console.log(moment().add(req.body.epoch_inicio, 'minutes').format('x'))
+    
     ip_mqtt_broker = req.body.ip_mqtt;
     usuario_mqtt = req.body.usr_mqtt;
     pass_mqtt = req.body.pass_mqtt;
-
-
-/*
-    else if(req.body.sync == "NO"){
-        console.log("Muestreo NO SINCRONIZADO");
-        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
-    }
-  */  
    
-    res.redirect('back');
+    return res.status(200).json({status: 'ok'});
 
 });
 
-
-app.post('/actualizar_estados',function(req,res){
+app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
+   let response = {}
 
+    try {
+        response = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+      } catch (e) {
+        return res.status(422).json(e)
+      }
 
-    shell.exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //bloqueante
-    //spawn('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt); //spawn funciona en segundo plano
-   
-    res.redirect('back');
-  //  res.end("yes");
+    if(response.stderr){
+        return res.status(422).json({errorMessage: response.stderr})
+    }
+    
+    let result = []
+
+    try {
+    const csvFilePath='./public/datos/estado/tabla_nodos_inicio.csv'
+    await csvtojson().fromFile(csvFilePath)
+                        .then((jsonObj)=>{
+                            result = jsonObj
+                        })
+    } catch (e) {
+        return res.status(422).json({error: e})
+    }
+         
+      res.status(200).json({status: 'ok', url: 'http://localhost:3001/datos/estado/tabla_nodos_inicio.csv', data: result});
 });
 
-app.post('/form_inicio',function(req,res){
+app.post('/form_inicio',async function(req,res){
     console.log("Formulario completado:");
-
-  //  console.log("Datos Formulario: " + req.body);
 
     console.log("Epoch inicio: " + req.body.epoch_inicio);
     console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
     console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
     console.log("Muestreo sincronizado: " + req.body.sync);
-    
-    if (req.body.sync == "SI"){
+
+    const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
+    let response
+
+    if (sync){
         console.log("Muestreo SINCRONIZADO");
-       // const initTime = moment().add(req.body.epoch_inicio, 'minutes').format('x')
-       const initTime = moment().add(req.body.epoch_inicio, 'm').unix()
- 
-       console.log(initTime, req.body.epoch_inicio)
-        shell.exec('./bash_scripts/principal_sync.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' '+ initTime +' ');
+        try {
+        response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        } catch (e) {
+        return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
+        }
     }
-    else if(req.body.sync == "NO"){
+    else {
         console.log("Muestreo NO SINCRONIZADO");
-        shell.exec('./bash_scripts/principal_async.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + req.body.duracion_muestreo + ' ' + req.body.nro_muestreo + ' ');
-    }
-    
-   
-    res.redirect('back');
+        try {
+            response = await exec('sh /app/bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+        } catch (e) {            
+            return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
 
-//    res.send("Muestreo iniciado");
-//    res.end("yes");
+        }
+    }   
+     
+    return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Medicion finalizadas'});
 });
 
 
-app.post('/cancelar_muestreo',function(req,res){
+app.post('/cancelar_muestreo',async function(req,res){
     console.log("Boton apretado: Cancelar muestreo");
+    let response
+    
+    try {
+        const pid = processData_initMedicion?.pid
+        console.log(pid)
+        response = await exec('sh /app/bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + pid);
+    } catch (e) {
+        return res.status(422).json({error: e});
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Medicion cancelada exitosamente'});
 
-    shell.exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
-    res.redirect('back');
-
-//    res.send("Cancelado");
 });
 
 
-app.post('/reiniciar_nodos',function(req,res){
+app.post('/reiniciar_nodos',async function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
-    shell.exec('./bash_scripts/reiniciar_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
-//    res.send("Reiniciados");
-    res.redirect('back');
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/reiniciar_nodos.sh' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
+    } catch (e) {
+        return res.status(422).json({error: e});
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Reinicio exitoso'});
 
 });
 
 
-app.post('/borrar_SD',function(req,res){
+app.post('/borrar_SD',async function(req,res){
     console.log("Boton apretado: Borrar los archivos de los nodos");
-    shell.exec('./bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
-//    res.send("Reiniciados");
-    res.redirect('back');
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'SD card borrada'});
 
 });
 
-app.post('/Descargar_datos',function(req,res){
+app.get('/download_files',function(req,res){
     console.log("Boton apretado: Descargar datos");
-    zipper.sync.zip("./mediciones/").compress().save("mediciones.zip");
-
-    res.download('mediciones.zip');   
-
-    /*
-    fs.unlink('mediciones.zip', function (err) {
-        if (err) throw err;
-        console.log('File deleted!');
-      });
-      */
+    zipper.sync.zip("./public/datos/mediciones/").compress().save("./public/datos/downloads/mediciones.zip");
+     res.download('./public/datos/downloads/mediciones.zip');   
 });
 
+app.get('/download_image/:imgName',function(req,res){
+    console.log(req.params.imgName)
+    res.download('public/img/' + req.params.imgName);   
+});
+
+app.post('/erase_reading',async function(req,res){
+    let response = {}
+    try {
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'mediciones');
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'Mediciones borradas'});
+});
+
+app.post('/erase_images',async function(req,res){
+    let response = {}
+    try {
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/img');
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'Imagenes borradas'});
+});
+
+app.post('/reset_tabla_nodos',async function(req,res){
+    let response = {}
+    try {
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'Tabla de nodos limpia'});
+});
+
+
+app.post('/graph_readings',async function(req,res){
+    let response = {}
+    try {
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'SD card borrada'});
+});
 
 
 // Serve URLs like /ftp/thing as public/ftp/thing
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory
-app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
+// app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
+// app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
+app.use(express.static('public'), serveIndex('public', {'icons': true}));
 
-app.listen(3000,function(){
-console.log("Servidor WEB iniciado en el puerto 3000");
+
+app.listen(3001,function(){
+console.log("Servidor WEB iniciado en el puerto 3001");
 })
 

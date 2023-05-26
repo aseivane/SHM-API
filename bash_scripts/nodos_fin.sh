@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Con openwrt debemos cambiar lo anterior por #!/bin/sh
 
 # Parametros iniciales
@@ -10,8 +10,8 @@ nro_medicion=$4
 
 topic2="nodo/fin"
 nro_medicion_ext=`printf %03d $nro_medicion`
-archivo1="./mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo3="./mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
+archivo3="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
 tout_fin="20s"
 
 #------------------------------------

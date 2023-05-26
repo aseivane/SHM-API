@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Con openwrt debemos cambiar lo anterior por #!/bin/sh
 
 nro_medicion=1  # numero de medicion

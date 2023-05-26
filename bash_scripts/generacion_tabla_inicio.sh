@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Parametros iniciales
 broker=$1
@@ -9,8 +9,8 @@ nro_medicion=$4
 
 topic2="nodo/confirmacion"
 
-archivo1="./mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
-archivo2="./mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
 
 # Guardo las respuestas y genero la tabla de nodos al inicio
 while read value; do

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Parametros iniciales
 broker=$1
@@ -9,7 +9,7 @@ nro_medicion=$4
 
 nro_medicion_ext=`printf %03d $nro_medicion`
 
-directorio1="./mediciones/medicion_$nro_medicion_ext"
+directorio1="/app/public/datos/mediciones/medicion_$nro_medicion_ext"
 #archivo1="$directorio1/mensajes_mqtt.log"
 archivo2="$directorio1/tabla_nodos_fin.csv"
 

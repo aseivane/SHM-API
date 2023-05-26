@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ip_mqtt_broker = $1
 usuario_mqtt = $2

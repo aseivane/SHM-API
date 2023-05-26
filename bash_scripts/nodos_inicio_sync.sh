@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Parametros iniciales
 broker=$1
@@ -13,8 +13,8 @@ nro_medicion=$6
 topic1="control/inicio_muestreo"
 
 nro_medicion_ext=`printf %03d $nro_medicion`
-archivo1="./mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo2="./mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
 
 echo "Archivo de confirmación: "
 echo $archivo2
