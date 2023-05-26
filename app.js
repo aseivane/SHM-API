@@ -39,7 +39,7 @@ var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
 
-var ip_mqtt_broker = '192.168.1.230';
+var ip_mqtt_broker = 'mosquitto.shm.com';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 const csvtojson = require("csvtojson/v2");
@@ -82,7 +82,7 @@ app.get('/actualizar_estados', async function(req,res){
    let response = {}
 
     try {
-        response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+        response = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
       } catch (e) {
         return res.status(422).json(e)
       }
@@ -120,7 +120,7 @@ app.post('/form_inicio',async function(req,res){
     if (sync){
         console.log("Muestreo SINCRONIZADO");
         try {
-        response = await exec('./bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' '+ epoch_inicio +' ', processData_initMedicion);
+        response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' '+ epoch_inicio +' ', processData_initMedicion);
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
         }
@@ -128,7 +128,7 @@ app.post('/form_inicio',async function(req,res){
     else {
         console.log("Muestreo NO SINCRONIZADO");
         try {
-            response = await exec('./bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+            response = await exec('sh /app/bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
         } catch (e) {            
             return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
 
@@ -145,7 +145,7 @@ app.post('/cancelar_muestreo',async function(req,res){
     
     try {
         const pid = processData_initMedicion?.pid
-        response = await exec('./bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + pid);
+        response = await exec('sh /app/bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + pid);
     } catch (e) {
         return res.status(422).json({error: e});
     }
@@ -158,7 +158,7 @@ app.post('/reiniciar_nodos',async function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
     let response
     try {
-        response = await exec('./bash_scripts/reiniciar_nodos.sh' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
+        response = await exec('sh /app/bash_scripts/reiniciar_nodos.sh' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
     } catch (e) {
         return res.status(422).json({error: e});
     }
@@ -171,7 +171,7 @@ app.post('/borrar_SD',async function(req,res){
     console.log("Boton apretado: Borrar los archivos de los nodos");
     let response
     try {
-        response = await exec('./bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
+        response = await exec('sh /app/bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -194,7 +194,7 @@ app.get('/download_image/:imgName',function(req,res){
 app.post('/erase_reading',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'mediciones');
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'mediciones');
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -205,7 +205,7 @@ app.post('/erase_reading',async function(req,res){
 app.post('/erase_images',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/img');
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/img');
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -216,7 +216,7 @@ app.post('/erase_images',async function(req,res){
 app.post('/reset_tabla_nodos',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -228,7 +228,7 @@ app.post('/reset_tabla_nodos',async function(req,res){
 app.post('/graph_readings',async function(req,res){
     let response = {}
     try {
-        response = await exec('./bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
+        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
     } catch (e) {
         return res.status(422).json({error: e});
 
