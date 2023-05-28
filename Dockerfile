@@ -25,7 +25,6 @@ COPY src ./src
 COPY app.js .
 COPY cluster.js .
 COPY bash_scripts ./bash_scripts
-COPY mediciones ./mediciones
 COPY python ./python
 
 RUN chown -R node /app/node_modules
