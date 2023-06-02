@@ -44,9 +44,38 @@ var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 const csvtojson = require("csvtojson/v2");
 
+
+const mqtt = require('mqtt') 
+const mqtt_broker = 'mqtt://mosquitto.shm.com'
+const mqtt_options = {
+    clientId: `backend_${Math.random().toString(16).slice(3)}`,
+    clean: false,
+    connectTimeout: 4000,
+    username: 'emqx',
+    password: 'public',
+    reconnectPeriod: 1000,
+};
+
 const processData_initMedicion = {}
  
 var app = express();
+const client = mqtt.connect(mqtt_broker, mqtt_options);
+
+client.on('reconnect', () => {
+    console.log("MQTT server reconnected");
+});
+
+client.on('connect', () => {
+    console.log("MQTT server connected");
+    client.subscribe('nodo/estado', () => {
+        console.log(`Subscribe to topic 'nodo/estado'`)
+      });
+});
+
+client.on('message', (topic, payload) => {
+    console.log('Received Message:', topic, payload.toString().replace(/ /g,","))
+});
+
 const exec = require('./src/utils/exect_pid')
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -81,6 +110,15 @@ app.get('/actualizar_estados', async function(req,res){
     console.log("Consulta de estado enviada");
    let response = {}
 
+    try {
+       response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+     } catch (e) {
+      return res.status(422).json(e)
+    }
+
+    if(response.stderr){
+        return res.status(422).json({errorMessage: response.stderr})
+    }
     try {
         response = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
       } catch (e) {
