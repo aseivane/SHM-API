@@ -226,23 +226,43 @@ app.post('/reset_tabla_nodos',async function(req,res){
 });
 
 
-app.post('/graph_readings',async function(req,res){
+app.get('/graph_readings/:medName',async function(req,res){
     let response = {}
-    try {
-        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'public/datos/estado');
-    } catch (e) {
-        return res.status(422).json({error: e});
+    let result = []
+    let nodes = []
 
+    try {
+
+        const nodeNamesFile=`./public/datos/mediciones/medicion_${req.params.medName}/tabla_nodos_inicio.csv`
+
+        await csvtojson().fromFile(nodeNamesFile)
+        .then((jsonObj)=>{
+            nodes = jsonObj.map(item => item.id)
+        })
+
+
+        for(let i = 0; i < nodes.length; i++){
+            const nodeName = nodes[i]
+
+            await csvtojson().fromFile(`./public/datos/mediciones/medicion_${req.params.medName}/datos_${req.params.medName}/nodo_${nodeName}/nodo_${nodeName}.csv`)
+            .then((jsonObj)=>{
+                const item = {name: nodeName, data: jsonObj}
+                result.push(item)
+            })    
+        }
+        
+    } catch (e) {
+        return res.status(422).json({error: e})
     }
-    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'SD card borrada'});
+
+    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', data: result});
 });
 
 
 // Serve URLs like /ftp/thing as public/ftp/thing
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory
-// app.use('/mediciones', express.static('mediciones'), serveIndex('mediciones', {'icons': true}))
-// app.use('/downloads', express.static('downloads'), serveIndex('downloads', {'icons': true}))
+
 app.use(express.static('public'), serveIndex('public', {'icons': true}));
 
 
