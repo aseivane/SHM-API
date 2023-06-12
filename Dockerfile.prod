@@ -27,7 +27,7 @@ COPY cluster.js .
 COPY bash_scripts ./bash_scripts
 COPY python ./python
 
-RUN chown -R node /app/node_modules
+#RUN chown -R node /app/node_modules
 #USER nodejs
 
 
