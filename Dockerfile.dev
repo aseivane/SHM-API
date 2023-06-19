@@ -2,7 +2,7 @@ FROM node:18-alpine
 #https://stackoverflow.com/questions/57573992/use-nodemon-with-docker-and-docker-compose
 # Create app directory
 WORKDIR /app
-RUN apk add --no-cache mosquitto-clients bash
+RUN apk add --no-cache mosquitto-clients bash wget
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
