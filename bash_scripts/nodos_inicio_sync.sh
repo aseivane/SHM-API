@@ -27,7 +27,7 @@ mosquitto_pub -t $topic1 -h $broker -p $port -m "$epoch_inicio $duracion $nro_me
 echo "Recibiendo confirmaciones de inicio"
 
 # Recepción de confirmacion de inicio de los nodos
-./bash_scripts/generacion_tabla_inicio.sh $broker $usr $pass $nro_medicion_ext 
+./bash_scripts/generacion_tabla_inicio.sh $broker $usr $pass $nro_medicion 
 
 
 

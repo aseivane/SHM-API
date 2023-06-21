@@ -67,8 +67,8 @@ client.on('reconnect', () => {
 
 client.on('connect', () => {
     console.log("MQTT server connected");
-    client.subscribe('nodo/estado', () => {
-        console.log(`Subscribe to topic 'nodo/estado'`)
+    client.subscribe('#', (err,granted) => {
+        console.log('subscribe to topic #',err,granted)
       });
 });
 
@@ -111,27 +111,17 @@ app.get('/actualizar_estados', async function(req,res){
    let response = {}
 
     try {
-       response = await exec('./bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-     } catch (e) {
-      return res.status(422).json(e)
-    }
-
-    if(response.stderr){
-        return res.status(422).json({errorMessage: response.stderr})
-    }
-    try {
         response = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
-      } catch (e) {
+    } catch (e) {
         return res.status(422).json(e)
-      }
+    }
 
     if(response.stderr){
         return res.status(422).json({errorMessage: response.stderr})
     }
-    
     let result = []
 
-    try {
+    try { 
     const csvFilePath='./public/datos/estado/tabla_nodos_inicio.csv'
     await csvtojson().fromFile(csvFilePath)
                         .then((jsonObj)=>{
@@ -145,6 +135,7 @@ app.get('/actualizar_estados', async function(req,res){
 });
 
 app.post('/form_inicio',async function(req,res){
+    req.setTimeout(req.body.timeout);
     console.log("Formulario completado:");
 
     console.log("Epoch inicio: " + req.body.epoch_inicio);

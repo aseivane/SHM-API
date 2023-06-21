@@ -56,7 +56,7 @@ echo "Se envia mensaje de inicialización e identificación de nodos."
 
 
 # escucha confirmación de inicio de los nodos
-./bash_scripts/nodos_inicio_async.sh $broker $usr $pass $duracion_m $nro_medicion_ext
+./bash_scripts/nodos_inicio_async.sh $broker $usr $pass $duracion_m $nro_medicion
 
 # contamos la cantidad de nodos identificados
 echo $archivo2
