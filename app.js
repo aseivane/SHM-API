@@ -32,7 +32,6 @@ Borrar un archivo: https://www.w3schools.com/nodejs/nodejs_filesystem.asp
 
 */
 
-
 var express = require("express");
 var bodyParser = require("body-parser");
 var serveIndex = require('serve-index');
@@ -48,6 +47,7 @@ const processData_initMedicion = {}
  
 var app = express();
 const exec = require('./src/utils/exect_pid')
+// const areNodeSync = require('./src/utils/areNodeSync')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -106,7 +106,49 @@ app.get('/actualizar_estados', async function(req,res){
       res.status(200).json({status: 'ok', url: 'http://localhost:3001/datos/estado/tabla_nodos_inicio.csv', data: result});
 });
 
-app.post('/form_inicio',async function(req,res){
+app.get('/check_measure_status',async function(req,res){
+
+    let result = []
+
+    try {
+        const response2 = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
+        if(!response2.stderr) {
+           try { 
+               const csvFilePath='./public/datos/estado/tabla_nodos_inicio.csv'
+               await csvtojson().fromFile(csvFilePath)
+                                   .then((jsonObj)=>{
+                                       result = jsonObj
+                                   })
+                const measureInProgress = result.find(node  => node.state === 'esperando_hora_inicio' || node.state === 'muestreando')
+
+                if (measureInProgress){
+                    return res.status(420).json({error:  'Hay una medición en curso. No se puede iniciar otra.'})    
+                }
+
+                if(req.body.sync) {
+                    const notSyncItems = result.find(node  => node.sync !== 'sincronizado')
+                    if(notSyncItems?.length > 0){
+                        return res.status(421).json({error:  'Los nodos no estan sincronizados'})    
+                    }
+                }
+
+                res.status(200).json({status: 'ok'});
+
+             
+               } catch (e) {
+                return res.status(422).json({error:  'Error al verificaar estado de nodos. Intente mas tarde'})    
+               }
+        }
+    
+    } catch (e) {
+        return res.status(422).json({error:  'Error al verificaar estado de nodos. Intente mas tarde'})
+    }
+    
+});
+
+app.post('/init_measure',async function(req,res){
+    req.setTimeout(req.body.timeout);
+    console.log('Timeout: ' + req.body.timeout);
     console.log("Formulario completado:");
 
     console.log("Epoch inicio: " + req.body.epoch_inicio);
@@ -117,8 +159,60 @@ app.post('/form_inicio',async function(req,res){
     const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
     let response
 
+
     if (sync){
         console.log("Muestreo SINCRONIZADO");
+        
+        try {
+        response = await exec('sh /app/bash_scripts/iniciar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        if(response.stderr) {
+            return res.status(422).json({errorMessage: response.stderr}) 
+        }
+        exec('sh /app/bash_scripts/finalizar_medicion_sync' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
+        } catch (e) {
+        return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
+        }
+    }
+    else {
+        console.log("Muestreo NO SINCRONIZADO");
+        try {
+            response = await exec('sh /app/bash_scripts/iniciar_medicion_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+       
+            if(response.stderr) {
+                return res.status(422).json({errorMessage: response.stderr}) 
+            }
+            exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+            res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
+        } catch (e) {            
+            return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
+
+        }
+    }   
+     
+    return res.status(422).json({errorMessage: response.stderr}) 
+});
+
+
+
+
+app.post('/form_inicio',async function(req,res){
+    req.setTimeout(req.body.timeout);
+    console.log('Timeout: ' + req.body.timeout);
+    console.log("Formulario completado:");
+
+    console.log("Epoch inicio: " + req.body.epoch_inicio);
+    console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
+    console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
+    console.log("Muestreo sincronizado: " + req.body.sync);
+
+    const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
+    let response
+
+
+    if (sync){
+        console.log("Muestreo SINCRONIZADO");
+
         try {
         response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
         } catch (e) {
