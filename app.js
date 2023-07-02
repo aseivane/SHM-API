@@ -122,13 +122,13 @@ app.get('/check_measure_status',async function(req,res){
                 const measureInProgress = result.find(node  => node.state === 'esperando_hora_inicio' || node.state === 'muestreando')
 
                 if (measureInProgress){
-                    return res.status(420).json({error:  'Hay una medición en curso. No se puede iniciar otra.'})    
+                    return res.status(200).json({status: 'measureInProgress', error:  'Hay una medición en curso. No se puede iniciar otra.'})    
                 }
 
                 if(req.body.sync) {
                     const notSyncItems = result.find(node  => node.sync !== 'sincronizado')
                     if(notSyncItems?.length > 0){
-                        return res.status(421).json({error:  'Los nodos no estan sincronizados'})    
+                        return res.status(200).json({status: 'nodesNotSync',error:  'Los nodos no estan sincronizados'})    
                     }
                 }
 
@@ -169,28 +169,25 @@ app.post('/init_measure',async function(req,res){
             return res.status(422).json({errorMessage: response.stderr}) 
         }
         exec('sh /app/bash_scripts/finalizar_medicion_sync' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
-        res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
+        return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
         }
     }
-    else {
-        console.log("Muestreo NO SINCRONIZADO");
-        try {
-            response = await exec('sh /app/bash_scripts/iniciar_medicion_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
-       
-            if(response.stderr) {
-                return res.status(422).json({errorMessage: response.stderr}) 
-            }
-            exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
-            res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
-        } catch (e) {            
-            return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
 
+    console.log("Muestreo NO SINCRONIZADO");
+    try {
+        response = await exec('sh /app/bash_scripts/iniciar_medicion_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+    
+        if(response.stderr) {
+            return res.status(422).json({errorMessage: response.stderr}) 
         }
-    }   
-     
-    return res.status(422).json({errorMessage: response.stderr}) 
+        exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+        return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
+    } catch (e) {            
+        return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
+
+    }
 });
 
 
