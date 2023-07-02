@@ -13,14 +13,13 @@ RUN adduser --system --uid 1001 nodejs
 COPY package*.json ./
 
 RUN \
-    if [ -f package-lock.json ]; then npm ci; \
+    if [ -f package-lock.json ]; then npm ci --omit=dev; \
     else npm install; \
     fi
 # If you are building your code for production
-#RUN npm ci --omit=dev
+#RUN npm ci
 
 # Bundle app source
-COPY public ./public
 COPY src ./src
 COPY app.js .
 COPY cluster.js .
