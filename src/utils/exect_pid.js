@@ -6,6 +6,7 @@ function Exec_pid (command, processData={}, options = { log: false, cwd: process
 
   const newPromise = new Promise((done, failed) => {
    const child = cp.exec(command, { ...options }, (err, stdout, stderr) => {
+    console.log(stdout, stderr)
       if (err) {
         err.stdout = stdout
         err.stderr = stderr
