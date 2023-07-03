@@ -168,7 +168,7 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
-        exec('sh /app/bash_scripts/finalizar_medicion_sync' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
@@ -182,7 +182,7 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
-        exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+        void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
     } catch (e) {            
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
