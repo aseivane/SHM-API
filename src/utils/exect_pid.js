@@ -15,7 +15,8 @@ function Exec_pid (command, processData={}, options = { log: false, cwd: process
       }
       done({ stdout, stderr })
     })
-    console.log(child.pid)
+    console.log("Running command: ", command)
+    //console.log(child.pid)
     processData.pid= child.pid 
   })
 
