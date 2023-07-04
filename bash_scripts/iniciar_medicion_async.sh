@@ -9,7 +9,6 @@ usr=$2
 pass=$3
 duracion_m=$4
 nro_medicion=$5
-epoch_inicio=$6
 
 nro_medicion_ext=`printf %03d "$nro_medicion"` 
 
@@ -37,18 +36,14 @@ cat /dev/null > $archivo3
 # Configuración inicial de tiempos
 #------------------------------------------------
 
-hora_actual_s=`date "+%s"`   # Lee la hora local en formato EPOCH
-hora_inicio_s=$epoch_inicio
-echo "epoch inicio $epoch_inicio" 
-#hora_inicio_s=$(( hora_actual_s + tout_inicio_s ))
-
-hora_fin_s=$(( hora_inicio_s + (60*duracion_m )))
+hora_inicio_s=`date "+%s"`   # Lee la hora local en formato EPOCH
+hora_fin_s=$(( $hora_inicio_s + (60*$duracion_m ) ))
 
 # Enviar mensaje de inicialización y escuchar respuestas
 #--------------------------------------------------
 # formato fecha-hora
-hora_inicio=`date +'%Y/%m/%d %H:%M:%S' -d @$hora_inicio_s`
-hora_fin=`date +'%Y/%m/%d %H:%M:%S' -d @$hora_fin_s`
+hora_inicio=`date "+%Y/%m/%d %H:%M:%S" -d "@$hora_inicio_s"`
+hora_fin=`date "+%Y/%m/%d %H:%M:%S" -d "@$hora_fin_s"`
 
 echo -e "\nINICIO\n------"
 echo "Hora de inicio:       $hora_inicio"
@@ -57,7 +52,7 @@ echo "Duración configurada: $duracion_m minutos"
 
 echo "Se envia mensaje de inicialización e identificación de nodos."
 # escucha confirmación de inicio de los nodos
-./bash_scripts/nodos_inicio_sync.sh $broker $usr $pass $epoch_inicio $duracion_m $nro_medicion
+./bash_scripts/nodos_inicio_async.sh $broker $usr $pass $duracion_m $nro_medicion
 
 # contamos la cantidad de nodos identificados
 echo $archivo2

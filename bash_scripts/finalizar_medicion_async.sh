@@ -25,7 +25,7 @@ k=0
 # Si existen, se vacían, sino se crean.
 #----------------------------------------------------
 if [ -d $directorio ]; then
-echo "El directorio existe"
+nop
 else
 mkdir $directorio
 fi
@@ -33,6 +33,15 @@ fi
 cat /dev/null > $archivo1
 cat /dev/null > $archivo2
 cat /dev/null > $archivo3
+
+# Espera para finalizar las mediciones
+#--------------------------------------------------
+hora_actual_s=`date "+%s"`  # devuelve los segundos de hora actual, desde algun año que no conozco
+espera_fin_s=$(( $duracion_m * 60  - 10 )) # tiempo de espera es la duracion menos 10 segundos de anticipación
+
+sleep $espera_fin_s
+
+echo -e "\rFin de las mediciones    $(date +"%Y/%m/%d %H:%M:%S")          "
 
 # Configuración inicial de tiempos
 #------------------------------------------------
@@ -51,4 +60,4 @@ echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicial
 #--------------------------------------------------
 echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
 echo "Solicitando archivos a los nodos..."
-./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicio
+./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion
