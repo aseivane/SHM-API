@@ -106,7 +106,7 @@ app.get('/actualizar_estados', async function(req,res){
       res.status(200).json({status: 'ok', url: 'http://localhost:3001/datos/estado/tabla_nodos_inicio.csv', data: result});
 });
 
-app.get('/check_measure_status',async function(req,res){
+app.post('/check_measure_status',async function(req,res){
 
     let result = []
 
@@ -127,12 +127,13 @@ app.get('/check_measure_status',async function(req,res){
 
                 if(req.body.sync) {
                     const notSyncItems = result.find(node  => node.sync !== 'sincronizado')
-                    if(notSyncItems?.length > 0){
+
+                    if(notSyncItems){
                         return res.status(200).json({status: 'nodesNotSync',error:  'Los nodos no estan sincronizados'})    
                     }
                 }
 
-                res.status(200).json({status: 'ok'});
+                res.status(200).json({status: 'ok2'});
 
              
                } catch (e) {
