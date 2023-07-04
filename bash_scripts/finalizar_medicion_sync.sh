@@ -26,27 +26,17 @@ k=0
 #--------------------------------------------------
 echo -e "\nMEDICIÓN\n--------"
 hora_actual_s=`date "+%s"`  # devuelve los segundos de hora actual, desde algun año que no conozco
-espera_inicio_s=$(( hora_inicio_s - hora_actual_s)) # tiempo de espera desde la hora actual hasta la hora de inicio
-#espera_inicio_s=5 # solo para pruebas!!!!
+espera_inicio_s=$(( $epoch_inicio - $hora_actual_s)) # tiempo de espera desde la hora actual hasta la hora de inicio
 
-cuenta_regresiva=$((`date +%s` + $espera_inicio_s)); 
+sleep $espera_inicio_s
 
-while [ "$cuenta_regresiva" -ge `date +%s` ]; do 
-:
- # echo -ne "Tiempo restante para iniciar la medicion: $(date -u --date @$(($cuenta_regresiva - `date +%s` )) +%H:%M:%S)\r"; 
-done #< <(timeout espera_fin_s) # se pone el comando acá eb vez de antes del while porque sino se pierde el valor de las variables dentro del bucle
 echo -e "\rInicio de las mediciones $(date +"%Y/%m/%d %H:%M:%S")         "
 
 hora_actual_s=`date "+%s"`  # devuelve los segundos de hora actual, desde algun año que no conozco
-espera_fin_s=$(( hora_fin_s - hora_actual_s - 10 )) # tiempo de espera es la duracion menos 10 segundos de anticipación
-#espera_fin_s=5 # solo para pruebas!!!!
+espera_fin_s=$(( $duracion_m * 60  - 10 )) # tiempo de espera es la duracion menos 10 segundos de anticipación
 
-cuenta_regresiva=$((`date +%s` + $espera_fin_s)); 
-#cuenta_regresiva=$((`date +%s` + $espera_fin_s - 10 `+%s` )); 
-while [ "$cuenta_regresiva" -ge `date +%s` ]; do 
-:
-#  echo -ne "Midiendo...   Tiempo restante para finalizar: $(date -u --date @$(($cuenta_regresiva - `date +%s` )) +%H:%M:%S)\r"; 
-done #< <(timeout espera_fin_s) # se pone el comando acá eb vez de antes del while porque sino se pierde el valor de las variables dentro del bucle
+sleep $espera_fin_s
+
 echo -e "\rFin de las mediciones    $(date +"%Y/%m/%d %H:%M:%S")          "
 
 
