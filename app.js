@@ -133,7 +133,7 @@ app.post('/check_measure_status',async function(req,res){
                     }
                 }
 
-                res.status(200).json({status: 'ok2'});
+                res.status(200).json({status: 'ok'});
 
              
                } catch (e) {
