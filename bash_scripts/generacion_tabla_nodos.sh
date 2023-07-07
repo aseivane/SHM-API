@@ -20,7 +20,7 @@ echo "AVERIGUANDO ESTADO DE LOS NODOS"
 if test -f "$archivo2"; then
     rm $archivo2
 fi
-echo "id,ip,rssi,type,sync,time,state" > $archivo2; 
+echo "id,alias,ip,rssi,type,sync,time,state,name,tLeft" > $archivo2; 
 
 # Preguntar por el estado de los nodos
 mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
@@ -37,8 +37,8 @@ while read value; do
   if [[ $topic = $topic2 ]]; then
     # guardar id y estado del nodo recibido
     # PREGUNTAR SI EL NODO ESTA REPETIDO EN LA TABLA
-    nodoid=`echo "$value" | awk '{print $2 "," $3 "," $4 "," $5 "," $6 "," $7 "," $8}'`
-    nodoid_shell=`echo "$value" | awk '{print $2 "," $3 "," $5}'`
+    nodoid=`echo "$value" | awk -F' ' 'BEGIN {OFS=","} {$1=""; sub("^,", ""); print}'`
+    nodoid_shell=`echo "$value" | awk '{print $2 "," $3 "," $4}'`
     echo "$nodoid" >> $archivo2   # guardamos datos en archivo
     echo "$ts mensaje recibido: [$value]" >> $archivo1   # guardamos datos en archivo
     echo "$ts Nodo identificado: $nodoid_shell"
