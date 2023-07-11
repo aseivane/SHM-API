@@ -122,7 +122,7 @@ app.post('/check_measure_status',async function(req,res){
                 const measureInProgress = result.find(node  => node.state === 'esperando_hora_inicio' || node.state === 'muestreando')
 
                 if (measureInProgress){
-                    return res.status(200).json({status: 'measureInProgress', error:  'Hay una medición en curso. No se puede iniciar otra.'})    
+                    return res.status(200).json({status: 'measureInProgress', error:  'Hay una medición en curso. No se puede iniciar otra.', data: result})    
                 }
 
                 if(req.body.sync) {
