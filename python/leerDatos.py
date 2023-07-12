@@ -1,8 +1,8 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from Medicion import Medicion
 import os
 import argparse
-
+'''
 def graficarMediciones(medicion):
     fig, ax = plt.subplots(2,1)
 
@@ -15,7 +15,7 @@ def graficarMediciones(medicion):
     ax[1].plot(medicion.temp, color='b', linewidth=0.1)
 
     plt.show()
-
+'''
 def agregarMediciones(dirName) -> list:
     dirList = os.listdir(dirName)
     listMediciones = []
@@ -40,7 +40,7 @@ def main():
     parser = argparse.ArgumentParser(prog='leer-mediciones')
     configParser(parser)
     args=vars(parser.parse_args())
-
+    
     if args['imageDir'] is not None :
         dirName = args['imageDir']
 
@@ -51,7 +51,7 @@ def main():
             medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
             medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
             medicion.exportarCSV()
-            medicion.graficar()
+            #medicion.graficar()
 
     elif args['listDir'] is not None:
         dirName = args['listDir']
@@ -68,10 +68,3 @@ def main():
 if __name__ == '__main__':
 
     main()
-
-
-
-
-
-
-

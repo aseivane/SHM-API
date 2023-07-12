@@ -1,6 +1,6 @@
 import os, math, csv
 import struct
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 class Medicion:
@@ -11,8 +11,9 @@ class Medicion:
             exit()
         
         #define los atributos basicos de la Medicion
+        self.separator='/'#'\\'
         self.dirName = dirName
-        dirObjects = dirName.split('\\')
+        dirObjects = dirName.split(self.separator)
 
         self.nodo = dirObjects.pop(-1)
         self.medicion = dirObjects.pop(-2)
@@ -41,7 +42,7 @@ class Medicion:
         dirList = os.listdir(self.dirName)
         for archivo in dirList:
             if archivo.split('.')[-1] == "DAT":
-                self.leerArchivoMediciones(self.dirName+"\\"+archivo)
+                self.leerArchivoMediciones(self.dirName+self.separator+archivo)
     
     def leerArchivoMediciones(self, fileName) -> None:
         file = open(fileName,"rb")
@@ -88,7 +89,7 @@ class Medicion:
         cantMuestras -=2
         return cantMuestras
     
-    
+    '''
     def graficar(self):
         fig, ax = plt.subplots()
 
@@ -98,10 +99,10 @@ class Medicion:
         ax.plot(self.accelerationZ, color='g', linewidth=0.1)
 
         plt.savefig(self.dirName + '\\' + self.nodo)
-    
+    '''
     def exportarCSV(self):
-        csvName = self.dirName.split("\\")[-1] + ".csv"
-        csvName = self.dirName + "\\" + csvName
+        csvName = self.dirName.split(self.separator)[-1] + ".csv"
+        csvName = self.dirName + self.separator + csvName
 
         try:
             newFile = open( csvName, 'w', newline='')
