@@ -24,7 +24,7 @@ while read value; do
   if [[ $topic = $topic2 ]]; then
   # guardar id y estado del nodo recibido
   # PREGUNTAR SI EL NODO ESTA REPETIDO EN LA TABLA 
-  nodoid=`echo "$value" | awk '{print $2 "," $3 "," $4 "," $5 "," $6 "," $7 "," $8}'`
+  nodoid=`echo "$value" | awk -F' ' 'BEGIN {OFS=","} {$1=""; sub("^,", ""); print}'`
   nodoid_shell=`echo "$value" | awk '{print $2 "," $3 "," $5}'`
   echo "$nodoid" >> $archivo2   # guardamos datos en archivo
   echo "$ts mensaje recibido: [$value]" >> $archivo1   # guardamos datos en archivo
