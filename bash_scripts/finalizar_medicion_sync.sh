@@ -56,7 +56,8 @@ echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicial
 #--------------------------------------------------
 echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
 echo "Solicitando archivos a los nodos..."
-./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion
+cant_archivos=$duracion_m #un archivo por minuto
+./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion $cant_archivos
 
 
 #--------------------------------------------------

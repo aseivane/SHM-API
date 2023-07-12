@@ -24,9 +24,7 @@ k=0
 # Comprobar la existencia de directorio de medición y archivos
 # Si existen, se vacían, sino se crean.
 #----------------------------------------------------
-if [ -d $directorio ]; then
-nop
-else
+if [ ! -d $directorio ]; then
 mkdir $directorio
 fi
 
@@ -60,4 +58,5 @@ echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicial
 #--------------------------------------------------
 echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
 echo "Solicitando archivos a los nodos..."
-./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion
+cant_archivos=$duracion_m #un archivo por minuto
+./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion $cant_archivos
