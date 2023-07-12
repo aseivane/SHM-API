@@ -41,7 +41,7 @@ class Medicion:
         #El ESP genera archivos de a 3000 mediciones (1min de grabacion)
         dirList = os.listdir(self.dirName)
         for archivo in dirList:
-            if archivo.split('.')[-1] == "DAT":
+            if archivo.split('.')[-1] == "dat":
                 self.leerArchivoMediciones(self.dirName+self.separator+archivo)
     
     def leerArchivoMediciones(self, fileName) -> None:
