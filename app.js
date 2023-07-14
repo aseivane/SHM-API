@@ -44,10 +44,11 @@ var pass_mqtt = 'usuariopassword';
 const csvtojson = require("csvtojson/v2");
 
 const processData_initMedicion = {}
+let lastMeasureName =  ''
  
 var app = express();
 const exec = require('./src/utils/exect_pid')
-// const areNodeSync = require('./src/utils/areNodeSync')
+const terminate = require('terminate/promise')
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -159,7 +160,7 @@ app.post('/init_measure',async function(req,res){
 
     const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
     let response
-
+    lastMeasureName = nro_muestreo
 
     if (sync){
         console.log("Muestreo SINCRONIZADO");
@@ -169,7 +170,16 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
-        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion).catch(error => {
+           if( error.signal == 'SIGKILL') {
+            console.log(lastMeasureName)
+            const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
+            if (fs.existsSync(dir)) {
+                fs.rmdirSync(dir, {recursive: true})
+            }  
+        }
+
+        });
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
         } catch (e) {
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
@@ -183,7 +193,15 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
-        void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
+        void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion).catch(error => {
+            if( error.signal == 'SIGKILL') {
+                const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
+                if (fs.existsSync(dir)) {
+                    fs.rmdirSync(dir, {recursive: true})
+                }  
+            }
+ 
+         });
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
     } catch (e) {            
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
@@ -239,6 +257,7 @@ app.post('/cancelar_muestreo',async function(req,res){
         const pid = processData_initMedicion?.pid
         console.log(pid)
         response = await exec('sh /app/bash_scripts/cancelar_muestreo.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + pid);
+        await terminate(pid)
     } catch (e) {
         return res.status(422).json({error: e});
     }
@@ -265,6 +284,7 @@ app.post('/borrar_SD',async function(req,res){
     let response
     try {
         response = await exec('sh /app/bash_scripts/borrar_SD.sh '+ ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt );
+        res.status(200).json({status: 'ok', message: 'SD borrada exitosamente'});
     } catch (e) {
         return res.status(422).json({error: e});
 
@@ -285,14 +305,42 @@ app.get('/download_image/:imgName',function(req,res){
 });
 
 app.post('/erase_reading',async function(req,res){
-    let response = {}
+    let exitoso = false
+
     try {
-        response = await exec('sh /app/bash_scripts/limpiar_carpeta.sh ' + 'mediciones');
+
+
+        const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo
+        console.log(dir)
+        if (fs.existsSync(dir)) {
+            fs.rmSync(dir, {recursive: true})
+            exitoso = true
+        }  
+        
     } catch (e) {
         return res.status(422).json({error: e});
 
     }
-    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', message: 'Mediciones borradas'});
+    return res.status(200).json({status: 'ok', message: exitoso ? 'Medición borrada exitosamente' : 'Medición no encontrada'});
+});
+
+app.post('/erase_all_reading',async function(req,res){
+    try {
+
+
+        const dir = '/app/public/datos/mediciones/'
+        if (fs.existsSync(dir)) {
+            fs.rmdirSync(dir, {recursive: true})
+            if (!fs.existsSync(dir)){
+                fs.mkdirSync(dir);
+            }
+        }  
+        
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return  res.status(200).json({status: 'ok', message: 'Mediciones borradas exitosamente'});
 });
 
 app.post('/erase_images',async function(req,res){
