@@ -112,6 +112,12 @@ app.post('/check_measure_status',async function(req,res){
     let result = []
 
     try {
+
+        const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo
+        if (fs.existsSync(dir) && !!req.body.nro_muestreo) {
+            return res.status(200).json({status: 'repeatedMeasure',error:  'El numero de medición ya fue utilizado'})    
+        }  
+
         const response2 = await exec('sh /app/bash_scripts/generacion_tabla_nodos.sh ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt)
         if(!response2.stderr) {
            try { 
