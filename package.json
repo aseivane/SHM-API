@@ -17,12 +17,13 @@
     "csvtojson": "^2.0.10",
     "express": "^4.17.1",
     "moment": "^2.29.4",
+    "nodemon": "^2.0.22",
     "pug": "^3.0.2",
     "save": "^2.4.0",
     "serve-index": "^1.9.1",
     "shelljs": "^0.8.4",
-    "zip-local": "^0.3.4",
-    "nodemon": "^2.0.22"
+    "terminate": "^2.6.1",
+    "zip-local": "^0.3.4"
   },
   "devDependencies": {
     "eslint": "^8.40.0",
