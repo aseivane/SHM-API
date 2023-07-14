@@ -64,7 +64,8 @@ cant_archivos=$duracion_m #un archivo por minuto
 echo -e "\nPROCESAMIENTO\n-------------"
 echo "(pendiente)"
 # procesar mediciones (dar formato, corregir errores, comprimir)
-#  procesar_mediciones.py
+directorio_datos=$directorio"/datos_$nro_medicion_ext"
+python3 /app/python/leerDatos.py --images $directorio_datos
 
 
 #--------------------------------------------------

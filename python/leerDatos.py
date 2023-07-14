@@ -1,25 +1,21 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from Medicion import Medicion
 import os
-
+import argparse
+'''
 def graficarMediciones(medicion):
-    fig, ax = plt.subplots(3,1)
+    fig, ax = plt.subplots(2,1)
 
     ax[0].set_title("Acelerometro")
     ax[0].plot(medicion.accelerationX, color='b', linewidth=0.1)
     ax[0].plot(medicion.accelerationY, color='r', linewidth=0.1)
     ax[0].plot(medicion.accelerationZ, color='g', linewidth=0.1)
-
-    ax[1].set_title("Giroscopo")
-    ax[1].plot(medicion.gyroscopeX, color='b', linewidth=0.1)
-    ax[1].plot(medicion.gyroscopeY, color='r', linewidth=0.1)
-    ax[1].plot(medicion.gyroscopeZ, color='g', linewidth=0.1)
     
-    ax[2].set_title("Temperatura")
-    ax[2].plot(medicion.temp, color='b', linewidth=0.1)
+    ax[1].set_title("Temperatura")
+    ax[1].plot(medicion.temp, color='b', linewidth=0.1)
 
     plt.show()
-
+'''
 def agregarMediciones(dirName) -> list:
     dirList = os.listdir(dirName)
     listMediciones = []
@@ -28,28 +24,47 @@ def agregarMediciones(dirName) -> list:
         dirNodo = os.path.join(dirName, carpeta)  # join the path
         listMediciones.append(Medicion(dirNodo))
 
-    return listMediciones
+    return listMediciones 
+
+
+def configParser(parser):
+    parser.add_argument('-i', '--images', type=str, metavar='dir', dest='imageDir',
+                    help='Crea imagenes de las mediciones en la carpeta indicada')
+    parser.add_argument('-l', '--list', type=str, metavar='dir', dest='listDir',
+                    help='Lista los archivos de la carpeta indicada')
+    
+def main():
+    ESCALA_ACELERACION = 16384
+    ESCALA_GIROSCOPO = 131
+
+    parser = argparse.ArgumentParser(prog='leer-mediciones')
+    configParser(parser)
+    args=vars(parser.parse_args())
+    
+    if args['imageDir'] is not None :
+        dirName = args['imageDir']
+
+        listMediciones = agregarMediciones(dirName)
+    
+        for medicion in listMediciones:
+            medicion.leerMediciones()
+            medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
+            medicion.cambiarEscalaAcelerometro(ESCALA_ACELERACION)
+            medicion.exportarCSV()
+            #medicion.graficar()
+
+    elif args['listDir'] is not None:
+        dirName = args['listDir']
+        return os.listdir(dirName)
+
+    if not dirName:
+        raise SystemExit(f"Ingrese carpeta con mediciones") 
+    
+    if not os.path.isdir(dirName):
+        raise SystemExit(f"No existe la carpeta \"{dirName}\"") 
+    
+
 
 if __name__ == '__main__':
 
-    # Los siguientes valores dependen de la sensibilidad utilizada
-    ESCALA_ACELEROMETRO = 16384
-    ESCALA_GIROSCOPO = 131
-
-    dirName = "C:\\Users\\user\\Documents\\Facu\\TP profesional\\prueba\\prueba\\p20\\5min\\medicion_025\\datos_025"
-    
-    listMediciones = agregarMediciones(dirName)
-    
-    for medicion in listMediciones:
-        medicion.leerMediciones()
-        medicion.cambiarEscalaGyroscopo(ESCALA_GIROSCOPO)
-        medicion.cambiarEscalaAcelerometro(ESCALA_ACELEROMETRO)
-        medicion.exportarCSV()
-
-    graficarMediciones(listMediciones[1])
-
-
-
-
-
-
+    main()

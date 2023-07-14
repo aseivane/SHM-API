@@ -60,3 +60,11 @@ echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
 echo "Solicitando archivos a los nodos..."
 cant_archivos=$duracion_m #un archivo por minuto
 ./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion $cant_archivos
+
+
+#--------------------------------------------------
+echo -e "\nPROCESAMIENTO\n-------------"
+echo "(pendiente)"
+# procesar mediciones (dar formato, corregir errores, comprimir)
+directorio_datos=$directorio"/datos_$nro_medicion_ext"
+python3 /app/python/leerDatos.py --images $directorio_datos

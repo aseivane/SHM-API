@@ -1,6 +1,7 @@
 import os, math, csv
-import numpy as np
 import struct
+#import matplotlib.pyplot as plt
+
 
 class Medicion:
     def __init__(self, dirName) -> None:
@@ -10,7 +11,12 @@ class Medicion:
             exit()
         
         #define los atributos basicos de la Medicion
+        self.separator='/'#'\\'
         self.dirName = dirName
+        dirObjects = dirName.split(self.separator)
+
+        self.nodo = dirObjects.pop(-1)
+        self.medicion = dirObjects.pop(-2)
 
         self.accelerationX = []
         self.accelerationY = []
@@ -35,8 +41,8 @@ class Medicion:
         #El ESP genera archivos de a 3000 mediciones (1min de grabacion)
         dirList = os.listdir(self.dirName)
         for archivo in dirList:
-            if archivo.split('.')[-1] == "DAT":
-                self.leerArchivoMediciones(self.dirName+"\\"+archivo)
+            if archivo.split('.')[-1] == "dat":
+                self.leerArchivoMediciones(self.dirName+self.separator+archivo)
     
     def leerArchivoMediciones(self, fileName) -> None:
         file = open(fileName,"rb")
@@ -83,9 +89,20 @@ class Medicion:
         cantMuestras -=2
         return cantMuestras
     
+    '''
+    def graficar(self):
+        fig, ax = plt.subplots()
+
+        ax.set_title("Acelerometro")
+        ax.plot(self.accelerationX, color='b', linewidth=0.1)
+        ax.plot(self.accelerationY, color='r', linewidth=0.1)
+        ax.plot(self.accelerationZ, color='g', linewidth=0.1)
+
+        plt.savefig(self.dirName + '\\' + self.nodo)
+    '''
     def exportarCSV(self):
-        csvName = self.dirName.split("\\")[-1] + ".csv"
-        csvName = self.dirName + "\\" + csvName
+        csvName = self.dirName.split(self.separator)[-1] + ".csv"
+        csvName = self.dirName + self.separator + csvName
 
         try:
             newFile = open( csvName, 'w', newline='')
