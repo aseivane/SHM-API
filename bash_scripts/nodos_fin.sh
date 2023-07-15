@@ -9,16 +9,15 @@ pass=$3
 nro_medicion=$4
 
 topic2="nodo/fin"
-nro_medicion_ext=`printf %03d $nro_medicion`
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo3="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+archivo3="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 tout_fin="20s"
 
 #------------------------------------
 # Escuchar las confirmaciones de las mediciones completas
 echo "Comenzando espera de $tout_fin para confirmaciones..."
 
-# Formato mensaje: [mac] [nro_meidcion]. $1 <topic>, $2 [mac], $3 [nro_medicion_ext]
+# Formato mensaje: [mac] [nro_meidcion]. $1 <topic>, $2 [mac], $3 [nro_medicion]
 
 while read value; do
 

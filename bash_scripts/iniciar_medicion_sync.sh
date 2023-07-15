@@ -11,13 +11,12 @@ duracion_m=$4
 nro_medicion=$5
 epoch_inicio=$6
 
-nro_medicion_ext=`printf %03d "$nro_medicion"` 
 
 tout_inicio_s=0
-directorio="/app/public/datos/mediciones/medicion_$nro_medicion_ext"
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo2="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
-archivo3="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_fin.csv"  
+directorio="/app/public/datos/mediciones/medicion_$nro_medicion"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
+archivo3="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 n=0
 k=0
 

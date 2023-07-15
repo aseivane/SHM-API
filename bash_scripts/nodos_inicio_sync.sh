@@ -12,9 +12,8 @@ nro_medicion=$6
 
 topic1="control/inicio_muestreo"
 
-nro_medicion_ext=`printf %03d $nro_medicion`
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion_ext/mensajes_mqtt.log"
-archivo2="/app/public/datos/mediciones/medicion_$nro_medicion_ext/tabla_nodos_inicio.csv"
+archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+archivo2="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
 
 echo "Archivo de confirmación: "
 echo $archivo2
@@ -27,7 +26,7 @@ mosquitto_pub -t $topic1 -h $broker -p $port -m "$epoch_inicio $duracion $nro_me
 echo "Recibiendo confirmaciones de inicio"
 
 # Recepción de confirmacion de inicio de los nodos
-./bash_scripts/generacion_tabla_inicio.sh $broker $usr $pass $nro_medicion_ext 
+./bash_scripts/generacion_tabla_inicio.sh $broker $usr $pass $nro_medicion 
 
 
 
