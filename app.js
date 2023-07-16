@@ -176,6 +176,13 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
+
+        if(req.body.comment) {
+        const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo + '/comentarios.txt'
+
+        fs.writeFileSync(dir, req.body.comment);
+        }
+
         void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion).catch(error => {
            if( error.signal == 'SIGKILL') {
             console.log(lastMeasureName)
@@ -198,6 +205,11 @@ app.post('/init_measure',async function(req,res){
     
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
+        }
+        if(req.body.comment) {
+            const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo + '/comentarios.txt'
+    
+            fs.writeFileSync(dir, req.body.comment);
         }
         void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion).catch(error => {
             if( error.signal == 'SIGKILL') {
