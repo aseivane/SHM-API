@@ -176,6 +176,13 @@ app.post('/init_measure',async function(req,res){
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
+
+        if(req.body.comment) {
+        const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo + '/comentarios.txt'
+
+        fs.writeFileSync(dir, req.body.comment);
+        }
+
         void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion).catch(error => {
            if( error.signal == 'SIGKILL') {
             console.log(lastMeasureName)
@@ -198,6 +205,11 @@ app.post('/init_measure',async function(req,res){
     
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
+        }
+        if(req.body.comment) {
+            const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo + '/comentarios.txt'
+    
+            fs.writeFileSync(dir, req.body.comment);
         }
         void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion).catch(error => {
             if( error.signal == 'SIGKILL') {
@@ -386,6 +398,9 @@ app.get('/graph_readings/:medName',async function(req,res){
             nodes = jsonObj.map(item => item.id)
         })
 
+        if(nodes?.length === 0){
+            return res.status(422).json({error:{message: 'No se encontraron nodos para graficar'}})
+        }
 
         for(let i = 0; i < nodes.length; i++){
             const nodeName = nodes[i]
@@ -398,11 +413,36 @@ app.get('/graph_readings/:medName',async function(req,res){
         }
         
     } catch (e) {
-        return res.status(422).json({error: e})
+        return res.status(422).json({error: {message: `Error leyendo datos para la medicion ${req.params.medName}`}})
     }
 
-    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', data: result});
+    return response.stderr ? res.status(422).json({error:{message: response.stderrs}}) : res.status(200).json({status: 'ok', data: result});
 });
+
+app.post('/create_csv',async function(req,res){
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/create_csv.sh '+ ' ' + req.body.nro_muestreo );
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({error: {message: response.stderrs}}) : res.status(200).json({status: 'ok', message: 'Csv creados correctamente'});
+
+});
+
+app.post('/recolect_last_measure',async function(req,res){
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/create_csv.sh '+ ' ' + req.body.nro_muestreo );
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({error: {message: response.stderrs}}) : res.status(200).json({status: 'ok', message: 'Csv creados correctamente'});
+
+});
+
 
 
 // Serve URLs like /ftp/thing as public/ftp/thing
