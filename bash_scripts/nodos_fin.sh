@@ -9,8 +9,8 @@ pass=$3
 nro_medicion=$4
 
 topic2="nodo/fin"
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
-archivo3="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
+mqtt_log="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+csv_fin="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 tout_fin="20s"
 
 #------------------------------------
@@ -25,20 +25,18 @@ while read value; do
 
   topic=`echo "$value" | awk '{print $1}'`
 
-echo "Mensaje recibido"
-
   if [[ $topic = $topic2 ]]; then
 
-  # guardar confirmación de medición completa
-  nodofin=`echo "$value" | awk '{print $2 "," $3}'`
-  echo "$nodofin,$ts" >> $archivo3   # guardamos datos en archivo
-  echo "$ts mensaje recibido: [$value]" >> $archivo1   # guardamos datos en archivo
-  echo "$ts $value" 
-  
+    # guardar confirmación de medición completa
+    nodofin=`echo "$value" | awk '{print $2 "," $3}'`
+    echo "$nodofin,$ts" >> $csv_fin   # guardamos datos en archivo
+    echo "$ts mensaje recibido: [$value]" >> $mqtt_log   # guardamos datos en archivo
+    echo "$ts $value" 
+    
   else
-  # respuesta no identificada
-  echo "$ts mensaje recibido no identificao!: [$value]" >> $archivo1   # guardamos datos en archivo
-  echo "$ts mensaje recibido no identificao!: [$value]"
+    # respuesta no identificada
+    echo "$ts mensaje recibido no identificao!: [$value]" >> $mqtt_log   # guardamos datos en archivo
+    echo "$ts mensaje recibido no identificao!: [$value]"
 
   fi
    
