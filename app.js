@@ -398,7 +398,6 @@ app.get('/graph_readings/:medName',async function(req,res){
             nodes = jsonObj.map(item => item.id)
         })
 
-
         for(let i = 0; i < nodes.length; i++){
             const nodeName = nodes[i]
 
@@ -413,8 +412,33 @@ app.get('/graph_readings/:medName',async function(req,res){
         return res.status(422).json({error: e})
     }
 
-    return response.stderr ? res.status(422).json({errorMessage: response.stderrs}) : res.status(200).json({status: 'ok', data: result});
+    return response.stderr ? res.status(422).json({error:{message: response.stderrs}}) : res.status(200).json({status: 'ok', data: result});
 });
+
+app.post('/create_csv',async function(req,res){
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/create_csv.sh '+ ' ' + req.body.nro_muestreo );
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({error: {message: response.stderrs}}) : res.status(200).json({status: 'ok', message: 'Csv creados correctamente'});
+
+});
+
+app.post('/recolect_last_measure',async function(req,res){
+    let response
+    try {
+        response = await exec('sh /app/bash_scripts/create_csv.sh '+ ' ' + req.body.nro_muestreo );
+    } catch (e) {
+        return res.status(422).json({error: e});
+
+    }
+    return response.stderr ? res.status(422).json({error: {message: response.stderrs}}) : res.status(200).json({status: 'ok', message: 'Csv creados correctamente'});
+
+});
+
 
 
 // Serve URLs like /ftp/thing as public/ftp/thing
