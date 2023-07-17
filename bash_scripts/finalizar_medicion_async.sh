@@ -11,24 +11,10 @@ duracion_m=$4
 nro_medicion=$5
 epoch_inicio=$6
 
-tout_inicio_s=0
 directorio="/app/public/datos/mediciones/medicion_$nro_medicion"
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
-archivo2="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
-archivo3="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
-n=0
-k=0
+csv_inicio="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
+csv_fin="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 
-# Comprobar la existencia de directorio de medición y archivos
-# Si existen, se vacían, sino se crean.
-#----------------------------------------------------
-if [ ! -d $directorio ]; then
-mkdir $directorio
-fi
-
-cat /dev/null > $archivo1
-cat /dev/null > $archivo2
-cat /dev/null > $archivo3
 
 # Espera para finalizar las mediciones
 #--------------------------------------------------
@@ -46,9 +32,11 @@ echo -e "\nCONFIRMACÓN\n-----------"
 
 # escuchar confirmaciones de los nodos
 ./bash_scripts/nodos_fin.sh $broker $usr $pass $nro_medicion
-datos=$(wc -l $archivo3)
-k=$(echo $datos | awk '{print $1}')  # numero de nodos que confirmaron la medición completa
-echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicialmente)"
+
+k=$(wc -l $csv_fin | awk '{print $1}')  # numero de nodos que confirmaron la medición completa
+n=$(wc -l $csv_inicio | awk '{print $1}') 
+
+echo "Completaron las mediciones $k nodos (de los $n nodos identificados inicialmente)"
 
 
 # pedir archivos por http nodo por nodo (leyendo de la tabla usando como topic coordinador/MAC-NODO)
@@ -61,7 +49,7 @@ cant_archivos=$duracion_m #un archivo por minuto
 
 #--------------------------------------------------
 echo -e "\nPROCESAMIENTO\n-------------"
-echo "(pendiente)"
 # procesar mediciones (dar formato, corregir errores, comprimir)
 directorio_datos=$directorio"/datos_$nro_medicion"
+echo "Generando csv en $directorio_datos"
 python3 /app/python/leerDatos.py --images $directorio_datos
