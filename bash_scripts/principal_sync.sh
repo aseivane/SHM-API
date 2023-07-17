@@ -105,7 +105,7 @@ echo -e "\nCONFIRMACÓN\n-----------"
 
 datos=$(wc -l $archivo3)
 k=$(echo $datos | awk '{print $1}')  # numero de nodos que confirmaron la medición completa
-echo "Completaron las medicioens $k nodos (de los $n nodos identificados inicialmente)"
+echo "Completaron las mediciones $k nodos (de los $n nodos identificados inicialmente)"
 
 
 # pedir archivos por http nodo por nodo (leyendo de la tabla usando como topic coordinador/MAC-NODO)
