@@ -50,6 +50,9 @@ cant_archivos=$duracion_m #un archivo por minuto
 #--------------------------------------------------
 echo -e "\nPROCESAMIENTO\n-------------"
 # procesar mediciones (dar formato, corregir errores, comprimir)
+#agregar headers aca para que no rompa el resto de los scripts
+sed -i '1s/^/id,ip,time\n/' $csv_fin
+
 directorio_datos=$directorio"/datos_$nro_medicion"
 echo "Generando csv en $directorio_datos"
 python3 /app/python/leerDatos.py --images $directorio_datos
