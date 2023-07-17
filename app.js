@@ -398,6 +398,10 @@ app.get('/graph_readings/:medName',async function(req,res){
             nodes = jsonObj.map(item => item.id)
         })
 
+        if(nodes?.length === 0){
+            return res.status(422).json({error:{message: 'No se encontraron nodos para graficar'}})
+        }
+
         for(let i = 0; i < nodes.length; i++){
             const nodeName = nodes[i]
 
@@ -409,7 +413,7 @@ app.get('/graph_readings/:medName',async function(req,res){
         }
         
     } catch (e) {
-        return res.status(422).json({error: e})
+        return res.status(422).json({error: {message: `Error leyendo datos para la medicion ${req.params.medName}`}})
     }
 
     return response.stderr ? res.status(422).json({error:{message: response.stderrs}}) : res.status(200).json({status: 'ok', data: result});
