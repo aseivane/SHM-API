@@ -341,7 +341,7 @@ app.post('/erase_reading',async function(req,res){
         return res.status(422).json({error: e});
 
     }
-    return res.status(200).json({status: 'ok', message: exitoso ? 'Medición borrada exitosamente' : 'Medición no encontrada'});
+    return !exitoso ? res.status(422).json({error: {message: 'Medición no encontrada'}}) : res.status(200).json({status: 'ok', message:  'Medición borrada exitosamente' });
 });
 
 app.post('/erase_all_reading',async function(req,res){
