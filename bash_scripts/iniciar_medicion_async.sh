@@ -12,24 +12,20 @@ nro_medicion=$5
 
 tout_inicio_s=0
 directorio="/app/public/datos/mediciones/medicion_$nro_medicion"
-archivo1="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
-archivo2="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
-archivo3="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
+mqtt_log="/app/public/datos/mediciones/medicion_$nro_medicion/mensajes_mqtt.log"
+csv_inicio="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_inicio.csv"
 n=0
 k=0
 
 # Comprobar la existencia de directorio de medición y archivos
 # Si existen, se vacían, sino se crean.
 #----------------------------------------------------
-if [ -d $directorio ]; then
-echo "El directorio existe"
-else
-mkdir $directorio
+if [ ! -d $directorio ]; then
+    mkdir $directorio
 fi
 
-cat /dev/null > $archivo1
-cat /dev/null > $archivo2
-cat /dev/null > $archivo3
+cat /dev/null > $mqtt_log
+cat /dev/null > $csv_inicio
 
 # Configuración inicial de tiempos
 #------------------------------------------------
@@ -53,11 +49,8 @@ echo "Se envia mensaje de inicialización e identificación de nodos."
 ./bash_scripts/nodos_inicio_async.sh $broker $usr $pass $duracion_m $nro_medicion
 
 # contamos la cantidad de nodos identificados
-echo $archivo2
 
-
-datos=$(wc -l $archivo2)
-n=$(echo $datos | awk '{print $1}') 
+n=$(wc -l $csv_inicio | awk '{print $1}') 
 
 # confirmamos
 echo "Se indentificaron $n nodos."
