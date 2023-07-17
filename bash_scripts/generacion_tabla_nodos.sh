@@ -22,7 +22,7 @@ echo "Hora Actual: $ts"
 
 
 if test -f "$csv"; then
-    rm $csv
+  cat /dev/null > $csv
 fi
 echo "id,alias,ip,rssi,type,sync,time,state,name,tLeft" > $csv; 
 
@@ -34,7 +34,6 @@ sleep $time_out
 while IFS= read -r line; do
 
   topic=`echo "$line" | awk '{print $1}'`
-
 
   if [[ $topic = $topic2 ]]; then
     # guardar id y estado del nodo recibido
