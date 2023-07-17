@@ -42,6 +42,7 @@ var ip_mqtt_broker = 'mosquitto.shm.com';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 const csvtojson = require("csvtojson/v2");
+const moment = require('moment')
 
 const processData_initMedicion = {}
 let lastMeasureName =  ''
@@ -168,24 +169,25 @@ app.post('/init_measure',async function(req,res){
     let response
     lastMeasureName = nro_muestreo
 
+    const epochUnix = moment().add(epoch_inicio, 'm').unix()
+
     if (sync){
         console.log("Muestreo SINCRONIZADO");
         
         try {
-        response = await exec('sh /app/bash_scripts/iniciar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
+        response = await exec('sh /app/bash_scripts/iniciar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epochUnix +' ', processData_initMedicion);
         if(response.stderr) {
             return res.status(422).json({errorMessage: response.stderr}) 
         }
 
         if(req.body.comment) {
-        const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo + '/comentarios.txt'
+        const dir = '/app/public/datos/mediciones/medicion_' + nro_muestreo + '/comentarios.txt'
 
         fs.writeFileSync(dir, req.body.comment);
         }
 
-        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion).catch(error => {
+        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epochUnix +' ', processData_initMedicion).catch(error => {
            if( error.signal == 'SIGKILL') {
-            console.log(lastMeasureName)
             const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
             if (fs.existsSync(dir)) {
                 fs.rmdirSync(dir, {recursive: true})
@@ -391,7 +393,7 @@ app.get('/graph_readings/:medName',async function(req,res){
 
     try {
 
-        const nodeNamesFile=`./public/datos/mediciones/medicion_${req.params.medName}/tabla_nodos_inicio.csv`
+        const nodeNamesFile=`./public/datos/mediciones/medicion_${req.params.medName}/tabla_nodos_fin.csv`
 
         await csvtojson().fromFile(nodeNamesFile)
         .then((jsonObj)=>{
