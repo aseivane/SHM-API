@@ -288,11 +288,11 @@ app.post('/reiniciar_nodos',async function(req,res){
     console.log("Boton apretado: Reiniciar Nodos");
     let response
     try {
-        response = await exec('sh /app/bash_scripts/reiniciar_nodos.sh' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
+        response = await exec('sh /app/bash_scripts/reiniciar_nodos.sh' + " " + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt);
     } catch (e) {
-        return res.status(422).json({error: e});
+        return res.status(422).json({error: {message: 'error al reiniciar nodos'}});
     }
-    return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Reinicio exitoso'});
+    return response.stderr ? res.status(422).json({error: {message: 'error al reiniciar nodos'}}) : res.status(200).json({status: 'ok', message: 'Reinicio exitoso'});
 
 });
 
