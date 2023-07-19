@@ -27,8 +27,10 @@ fi
 echo "id,alias,ip,rssi,type,sync,time,state,name,tLeft" > $csv; 
 
 # Preguntar por el estado de los nodos
-mosquitto_sub -t $topic2 -h $broker -p $port -v -u $usr -P $pass -W $time_out 1> $temp 2> /dev/null &
-mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
+if [ ! test -f "$temp" ]; then  #si el archivo temporal ya esta generado es porque se acaba de hacer una consulta 
+  mosquitto_sub -t $topic2 -h $broker -p $port -v -u $usr -P $pass -W $time_out 1> $temp 2> /dev/null &
+  mosquitto_pub -t control/estado -h $broker -p $port -m "0" -u $usr -P $pass # Consulta de estado a todos los nodos
+fi
 sleep $time_out
 
 while IFS= read -r line; do
@@ -50,5 +52,7 @@ while IFS= read -r line; do
   fi
 
 done < $temp # se pone el comando acá eb vez de antes del while porque sino se pierde el valor de las variables dentro del bucle
-rm $temp
+if [ ! test -f "$temp" ]; then
+  rm $temp
+fi
 echo "Fin de la consulta de estado"
