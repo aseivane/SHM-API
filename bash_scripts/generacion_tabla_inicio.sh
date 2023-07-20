@@ -36,7 +36,7 @@ while IFS= read -r line; do
   fi
 
 done < $temp # se pone el comando acá en vez de antes del while porque sino se pierde el valor de las variables dentro del bucle
-if [ ! -f "$temp" ]; then
+if [ -f "$temp" ]; then
   rm $temp
 fi
 echo "Fin de la consulta de estado"

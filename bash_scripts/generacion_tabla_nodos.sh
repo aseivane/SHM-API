@@ -9,10 +9,9 @@ usr=$2
 pass=$3
 
 topic2="nodo/estado"
-
 mqtt_log="/app/public/datos/estado/mensajes_mqtt.log"
 csv="/app/public/datos/estado/tabla_nodos_inicio.csv"
-temp="/app/public/datos/estado/temp.txt"
+temp="/app/public/datos/estado/temp$RANDOM.txt"
 time_out=6
 
 
@@ -52,7 +51,7 @@ while IFS= read -r line; do
   fi
 
 done < $temp # se pone el comando acá eb vez de antes del while porque sino se pierde el valor de las variables dentro del bucle
-if [ ! -f "$temp" ]; then
+if [ -f "$temp" ]; then
   rm $temp
 fi
 echo "Fin de la consulta de estado"
