@@ -38,7 +38,7 @@ var serveIndex = require('serve-index');
 var zipper = require('zip-local');
 var fs = require('fs');
 
-var ip_mqtt_broker = 'mosquitto.shm.com';
+var ip_mqtt_broker = 'mosquitto';
 var usuario_mqtt = 'usuario';
 var pass_mqtt = 'usuariopassword';
 const csvtojson = require("csvtojson/v2");
