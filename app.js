@@ -484,9 +484,6 @@ app.post('/clean_app_state',async function(req,res){
 });
 
 
-
-
-
 // Serve URLs like /ftp/thing as public/ftp/thing
 // The express.static serves the file contents
 // The serveIndex is this module serving the directory

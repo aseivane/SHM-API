@@ -5,6 +5,9 @@ pass=$3
 duracion_m=$4
 nro_medicion=$5
 
+directorio="/app/public/datos/mediciones/medicion_$nro_medicion"
+
+csv_fin="/app/public/datos/mediciones/medicion_$nro_medicion/tabla_nodos_fin.csv"  
 
 
 echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
