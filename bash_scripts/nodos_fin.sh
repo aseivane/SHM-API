@@ -28,7 +28,7 @@ while read value; do
   if [[ $topic = $topic2 ]]; then
 
     # guardar confirmación de medición completa
-    nodofin=`echo "$value" | awk '{print $2 "," $3}'`
+    nodofin=`echo "$value" | awk '{print $2 "," $3 "," $5}'`
     echo "$nodofin,$ts" >> $csv_fin   # guardamos datos en archivo
     echo "$ts mensaje recibido: [$value]" >> $mqtt_log   # guardamos datos en archivo
     echo "$ts $value" 
