@@ -39,20 +39,20 @@ n=$(wc -l $csv_inicio | awk '{print $1}')
 echo "Completaron las mediciones $k nodos (de los $n nodos identificados inicialmente)"
 
 
-# pedir archivos por http nodo por nodo (leyendo de la tabla usando como topic coordinador/MAC-NODO)
-#--------------------------------------------------
-echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
-echo "Solicitando archivos a los nodos..."
-cant_archivos=$duracion_m #un archivo por minuto
-./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion $cant_archivos
+# # pedir archivos por http nodo por nodo (leyendo de la tabla usando como topic coordinador/MAC-NODO)
+# #--------------------------------------------------
+# echo -e "\nRECOLECCIÓN Y BORRADO DE TARJETAS\n-----------"
+# echo "Solicitando archivos a los nodos..."
+# cant_archivos=$duracion_m #un archivo por minuto
+# ./bash_scripts/recoleccion.sh $broker $usr $pass $nro_medicion $cant_archivos
 
 
-#--------------------------------------------------
-echo -e "\nPROCESAMIENTO\n-------------"
-# procesar mediciones (dar formato, corregir errores, comprimir)
-#agregar headers aca para que no rompa el resto de los scripts
-sed -i '1s/^/id,ip,time\n/' $csv_fin
+# #--------------------------------------------------
+# echo -e "\nPROCESAMIENTO\n-------------"
+# # procesar mediciones (dar formato, corregir errores, comprimir)
+# #agregar headers aca para que no rompa el resto de los scripts
+# sed -i '1s/^/id,ip,time\n/' $csv_fin
 
-directorio_datos=$directorio"/datos_$nro_medicion"
-echo "Generando csv en $directorio_datos"
-python3 /app/python/leerDatos.py --images $directorio_datos
+# directorio_datos=$directorio"/datos_$nro_medicion"
+# echo "Generando csv en $directorio_datos"
+# python3 /app/python/leerDatos.py --images $directorio_datos

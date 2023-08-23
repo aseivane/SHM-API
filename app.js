@@ -46,7 +46,12 @@ const moment = require('moment')
 
 const processData_initMedicion = {}
 let lastMeasureName =  ''
- 
+let processData_downloadInProgress = {
+    process: {},
+    downloading: false,
+    lastDownloadError: false,
+}
+
 var app = express();
 const exec = require('./src/utils/exect_pid')
 const terminate = require('terminate/promise')
@@ -64,6 +69,7 @@ const corsOptions ={
 
 }
 app.use(cors(corsOptions));
+
 
 app.post('/form_config_sistema',function(req,res){
     console.log("Formulario completado:");
@@ -112,6 +118,10 @@ app.post('/check_measure_status',async function(req,res){
 
     let result = []
 
+    if(processData_downloadInProgress.downloading) {
+        return res.status(200).json({status: 'downloadInProgress', error:  'Hay una descarga en curso. No se puede iniciar otra.'})    
+    }
+
     try {
 
         const dir = '/app/public/datos/mediciones/medicion_' + req.body.nro_muestreo
@@ -130,7 +140,7 @@ app.post('/check_measure_status',async function(req,res){
                 const measureInProgress = result.find(node  => node.state === 'esperando_hora_inicio' || node.state === 'muestreando')
 
                 if (measureInProgress){
-                    return res.status(200).json({status: 'measureInProgress', error:  'Hay una medición en curso. No se puede iniciar otra.', data: result})    
+                    return res.status(200).json({status: measureInProgress.state === 'muestreando' ? 'measureInProgress' : 'waitingStartMeasure', error:  'Hay una medición en curso. No se puede iniciar otra.', data: result})    
                 }
 
                 if(req.body.sync) {
@@ -186,14 +196,41 @@ app.post('/init_measure',async function(req,res){
         fs.writeFileSync(dir, req.body.comment);
         }
 
-        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epochUnix +' ', processData_initMedicion).catch(error => {
+        void exec('sh /app/bash_scripts/finalizar_medicion_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epochUnix +' ', processData_initMedicion)
+        .then(() => {
+            console.log("THEN DE INIT")
+
+            processData_downloadInProgress.downloading = true
+            processData_downloadInProgress.lastDownloadError = false
+            console.log("DOWNLOAD STATE ", processData_downloadInProgress)
+            void exec('sh /app/bash_scripts/recolectar_y_crear_csv.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt  + ' ' + duracion_muestreo + ' ' + nro_muestreo +' ', processData_downloadInProgress.process)
+            .then(() => {
+                console.log('Download finished measure Then:',nro_muestreo, '\n')
+                processData_downloadInProgress.downloading = false
+            })
+            .catch(error => {
+               console.log('Download Error measure:',nro_muestreo, '\n', error)
+               processData_downloadInProgress.downloading = false
+
+                processData_downloadInProgress.lastDownloadError = true
+            })
+            .finally(() => {
+                console.log('Download finished measure:',nro_muestreo, '\n')
+                processData_downloadInProgress.downloading = false
+                console.log(processData_downloadInProgress)
+            });
+        })
+        .catch(error => {
+            console.log('Measuere error: \n', error)
+            processData_downloadInProgress.lastDownloadError = true
+            processData_downloadInProgress.downloading = false
+
            if( error.signal == 'SIGKILL') {
             const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
             if (fs.existsSync(dir)) {
                 fs.rmdirSync(dir, {recursive: true})
             }  
         }
-
         });
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
         } catch (e) {
@@ -213,61 +250,33 @@ app.post('/init_measure',async function(req,res){
     
             fs.writeFileSync(dir, req.body.comment);
         }
-        void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion).catch(error => {
-            if( error.signal == 'SIGKILL') {
-                const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
-                if (fs.existsSync(dir)) {
-                    fs.rmdirSync(dir, {recursive: true})
-                }  
-            }
- 
-         });
+        void exec('sh /app/bash_scripts/finalizar_medicion_async.sh' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion)  .then(() => {
+            processData_downloadInProgress.downloading = true
+            processData_downloadInProgress.lastDownloadError = false
+            void exec('sh /app/bash_scripts/recolectar_y_crear_csv.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt  + ' ' + duracion_muestreo + ' ' + nro_muestreo +' ', processData_downloadInProgress.process)
+            .catch(error => {
+               console.log('Download Error measure: ',nro_muestreo, '\n', error)
+               processData_downloadInProgress.lastDownloadError = false
+
+            })
+            .finally(() => {
+                processData_downloadInProgress.downloading = false
+            });
+        })
+        .catch(error => {
+           if( error.signal == 'SIGKILL') {
+            const dir = '/app/public/datos/mediciones/medicion_' + lastMeasureName
+            if (fs.existsSync(dir)) {
+                fs.rmdirSync(dir, {recursive: true})
+            }  
+        }
+        });
         return res.status(200).json({status: 'ok', message: 'Medicion iniciada'});
     } catch (e) {            
         return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
 
     }
 });
-
-
-
-
-app.post('/form_inicio',async function(req,res){
-    req.setTimeout(req.body.timeout);
-    console.log('Timeout: ' + req.body.timeout);
-    console.log("Formulario completado:");
-
-    console.log("Epoch inicio: " + req.body.epoch_inicio);
-    console.log("Duración del muestreo (minutos): " + req.body.duracion_muestreo);
-    console.log("Numero de identificación del muestreo: "+ req.body.nro_muestreo);
-    console.log("Muestreo sincronizado: " + req.body.sync);
-
-    const { epoch_inicio, duracion_muestreo, nro_muestreo, sync } = req.body || {}
-    let response
-
-
-    if (sync){
-        console.log("Muestreo SINCRONIZADO");
-
-        try {
-        response = await exec('sh /app/bash_scripts/principal_sync.sh' + ' ' + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' ' + duracion_muestreo + ' ' + nro_muestreo + ' ' + epoch_inicio +' ', processData_initMedicion);
-        } catch (e) {
-        return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});    
-        }
-    }
-    else {
-        console.log("Muestreo NO SINCRONIZADO");
-        try {
-            response = await exec('sh /app/bash_scripts/principal_async.sh ' + ' '  + ip_mqtt_broker + ' ' + usuario_mqtt + ' ' + pass_mqtt + ' '  + duracion_muestreo + ' ' + nro_muestreo + ' ', processData_initMedicion);
-        } catch (e) {            
-            return res.status(422).json({error:  e.signal == 'SIGKILL' ? 'Medicion cancelada' : e});
-
-        }
-    }   
-     
-    return response.stderr ? res.status(422).json({errorMessage: response.stderr}) : res.status(200).json({status: 'ok', message: 'Medicion finalizadas'});
-});
-
 
 app.post('/cancelar_muestreo',async function(req,res){
     console.log("Boton apretado: Cancelar muestreo");
@@ -346,8 +355,6 @@ app.post('/erase_reading',async function(req,res){
 
 app.post('/erase_all_reading',async function(req,res){
     try {
-
-
         const dir = '/app/public/datos/mediciones/'
         if (fs.existsSync(dir)) {
             fs.rmdirSync(dir, {recursive: true})
@@ -397,7 +404,7 @@ app.get('/graph_readings/:medName',async function(req,res){
 
         await csvtojson().fromFile(nodeNamesFile)
         .then((jsonObj)=>{
-            nodes = jsonObj.map(item => item.id)
+            nodes = jsonObj.map(item => `${item.id}_${item.alias}`)
         })
 
         if(nodes?.length === 0){
@@ -445,6 +452,36 @@ app.post('/recolect_last_measure',async function(req,res){
 
 });
 
+app.post('/cancel_downloads',async function(req,res){
+    try {
+        const pid = processData_downloadInProgress.process?.pid
+        console.log("killing pid: ", pid)
+        await terminate(pid)
+        processData_downloadInProgress.downloading = false
+        processData_downloadInProgress.lastDownloadError = true
+
+    } catch (e) {
+        processData_downloadInProgress.lastDownloadError = true
+        return res.status(422).json({error: e});
+    }
+   
+    return  res.status(200).json({status: 'ok', message: 'Descarga detenida.'});
+
+});
+app.post('/check_download_in_progress',async function(req,res){
+    console.log(processData_downloadInProgress)
+    return  res.status(200).json({status: processData_downloadInProgress.downloading ? 'downloadInProgress' : 'ok', message: ''});
+
+});
+
+app.post('/clean_app_state',async function(req,res){
+    processData_downloadInProgress.process = {}
+    processData_downloadInProgress.downloading = false
+    processData_downloadInProgress.lastDownloadError = false
+  
+    return  res.status(200).json({status:'ok', message: ''});
+
+});
 
 
 // Serve URLs like /ftp/thing as public/ftp/thing

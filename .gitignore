@@ -99,3 +99,7 @@ dist
 
 #archivos lock
 *.lock
+
+#mediciones
+/public/datos/mediciones
+/public/datos/estado
