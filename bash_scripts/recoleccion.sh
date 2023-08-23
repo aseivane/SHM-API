@@ -38,7 +38,7 @@ do
     alias_nodo=$(echo $ALIASes | awk "{print \$$i}") #extrae alias de i-esimo nodo
 
     #nro_nodo=`printf %03d $i`
-    directorio3="$directorio2/nodo_$id_nodo&_$alias_nodo" # genera ruta a la carpeta del i-esimo nodo
+    directorio3="$directorio2/nodo_$id_nodo"_"$alias_nodo" # genera ruta a la carpeta del i-esimo nodo
 
     if [ ! -d $directorio3 ]; then  # si no existe la carpeta del nodo, la crea
         mkdir $directorio3

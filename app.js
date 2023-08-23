@@ -404,7 +404,7 @@ app.get('/graph_readings/:medName',async function(req,res){
 
         await csvtojson().fromFile(nodeNamesFile)
         .then((jsonObj)=>{
-            nodes = jsonObj.map(item => item.id)
+            nodes = jsonObj.map(item => `${item.id}_${item.alias}`)
         })
 
         if(nodes?.length === 0){
