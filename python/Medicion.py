@@ -112,7 +112,7 @@ class Medicion:
         writer = csv.writer(newFile)
 
         headers = ['accelerationX', 'accelerationY', 'accelerationZ',
-                    'gyroscopeX', 'gyroscopeY', 'gyroscopeZ', 'Temperature']  
+                    'gyroscopeX', 'gyroscopeY', 'gyroscopeZ', 'temperature']  
 
         writer.writerow(headers)
         matrix = [ self.accelerationX , self.accelerationY, self.accelerationZ,
