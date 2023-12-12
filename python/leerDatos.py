@@ -34,7 +34,7 @@ def configParser(parser):
                     help='Lista los archivos de la carpeta indicada')
     
 def main():
-    ESCALA_ACELERACION = 16384
+    ESCALA_ACELERACION = 16384/9.806
     ESCALA_GIROSCOPO = 131
 
     parser = argparse.ArgumentParser(prog='leer-mediciones')
