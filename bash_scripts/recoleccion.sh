@@ -65,8 +65,8 @@ do
     then
         echo "Nodo $id_nodo: recepción completa."
 
-        mosquitto_pub -t $topic1 -h $broker -p $port -m "$id_nodo" -u $usr -P $pass # Borrar tarjeta de memoria
-        echo "Nodo $id_nodo: mensaje de borrado enviado."
+        #mosquitto_pub -t $topic1 -h $broker -p $port -m "$id_nodo" -u $usr -P $pass # Borrar tarjeta de memoria
+        #echo "Nodo $id_nodo: mensaje de borrado enviado."
     else 
         echo "Error al descargar $download_errors archivos"
     fi
